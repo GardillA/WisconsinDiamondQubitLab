@@ -508,9 +508,7 @@ def main_with_cxn(cxn, nv_sig,  uwave_time_range, state,
 
     raw_data = {'timestamp': timestamp,
                 'timeElapsed': timeElapsed,
-                'timeElapsed-units': 's',
                 'nv_sig': nv_sig,
-                # 'nv_sig-units': tool_belt.get_nv_sig_units(),
                 'uwave_freq': uwave_freq,
                 'uwave_freq-units': 'GHz',
                 'uwave_power': uwave_power,
@@ -523,13 +521,14 @@ def main_with_cxn(cxn, nv_sig,  uwave_time_range, state,
                 'num_runs': num_runs,
                 'tau_index_master_list':tau_index_master_list,
                 'opti_coords_list': opti_coords_list,
-                'opti_coords_list-units': 'V',
                 'sig_counts': sig_counts.astype(int).tolist(),
                 'sig_counts-units': 'counts',
                 'ref_counts': ref_counts.astype(int).tolist(),
                 'ref_counts-units': 'counts',
                 'norm_avg_sig': norm_avg_sig.astype(float).tolist(),
-                'norm_avg_sig-units': 'arb'}
+                'norm_avg_sig-units': 'arb',
+                "norm_avg_sig_ste": norm_avg_sig_ste.astype(float).tolist(),
+                "norm_avg_sig_ste-units": "arb",}
 
     nv_name = nv_sig["name"]
     file_path = tool_belt.get_file_path(__file__, timestamp, nv_name)

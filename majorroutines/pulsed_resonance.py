@@ -99,7 +99,7 @@ def create_fit_figure(
     fig, ax = plt.subplots()
     ax.set_xlabel(r"Frequency, $\nu$ (GHz)")
     ax.set_ylabel("Normalized fluorescence")
-    ax.set_title('Rabi Measurement')
+    ax.set_title('Electron Spin Resonance Measurement')
     freqs = calculate_freqs(freq_center, freq_range, num_steps)
     smooth_freqs = calculate_freqs(freq_center, freq_range, 1000)
 
@@ -210,7 +210,7 @@ def create_raw_data_figure(
     ax_sig_ref.set_ylabel(r"Fluorescence rate (counts / s $\times 10^3$)")
     ax_norm.set_xlabel(r"Frequency, $\nu$ (GHz)")
     ax_norm.set_ylabel("Normalized fluorescence")
-    ax_norm.set_title('Rabi Measurement')
+    ax_norm.set_title('Electron Spin Resonance Measurement')
     
     return fig, ax_sig_ref, ax_norm
 
@@ -618,6 +618,7 @@ def main_with_cxn(
     ### Setup
 
     start_timestamp = tool_belt.get_time_stamp()
+    startFunctionTime = time.time()
 
     kpl.init_kplotlib()
 
@@ -891,32 +892,31 @@ def main_with_cxn(
 
     tool_belt.reset_cfm(cxn)
 
+    endFunctionTime = time.time()
+
+    timeElapsed = endFunctionTime - startFunctionTime
     timestamp = tool_belt.get_time_stamp()
 
     # If you update this, also update the incremental data above if necessary
     data = {
         "start_timestamp": start_timestamp,
         "timestamp": timestamp,
+        'timeElapsed': timeElapsed,
         "nv_sig": nv_sig,
-        "opti_coords_list": opti_coords_list,
-        "opti_coords_list-units": "V",
         "freq_center": freq_center,
         "freq_center-units": "GHz",
         "freq_range": freq_range,
         "freq_range-units": "GHz",
         "uwave_pulse_dur": uwave_pulse_dur,
         "uwave_pulse_dur-units": "ns",
+        "uwave_power": uwave_power,
+        "uwave_power-units": "dBm",
         "state": state.name,
         "num_steps": num_steps,
         "num_reps": num_reps,
         "num_runs": num_runs,
-        "uwave_power": uwave_power,
-        "uwave_power-units": "dBm",
-        "spin_readout_dur": spin_readout_dur,
-        "spin_readout_dur-units": "ns",
         "freq_index_master_list": freq_index_master_list,
         "opti_coords_list": opti_coords_list,
-        "opti_coords_list-units": "V",
         "sig_counts": sig_counts.astype(int).tolist(),
         "sig_counts-units": "counts",
         "ref_counts": ref_counts.astype(int).tolist(),

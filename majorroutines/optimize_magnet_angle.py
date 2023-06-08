@@ -190,7 +190,7 @@ def main_with_cxn(cxn, nv_sig, angle_range, num_angle_steps,
 
     # Set up the raw data dictionary
     raw_data = {'nv_sig': nv_sig,
-                'nv_sig-units': tool_belt.get_nv_sig_units(),
+                'nv_sig-units': tool_belt.get_nv_sig_units(cxn),
                 'angle_range': angle_range,
                 'angle_range-units': 'deg',
                 'num_angle_steps': num_angle_steps,

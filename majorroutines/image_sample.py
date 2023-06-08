@@ -212,6 +212,11 @@ def main_with_cxn(
     # print(seq_args)
     ret_vals = pulse_gen.stream_load(seq_file,seq_args_string)
     period = ret_vals[0]
+    
+    
+    print('')
+    print(tool_belt.get_expected_run_time_string(cxn,'image_sample',period, total_num_samples, 1, 1))
+    print('')
         
     ### Set up the xy_server (xyz_server if 'xz' scan_type)
 

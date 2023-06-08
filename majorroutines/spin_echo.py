@@ -647,7 +647,7 @@ def main_with_cxn(
     
     
     # create figure
-    raw_fig, ax_sig_ref, ax_norm = create_raw_data_figure(taus/1000)
+    raw_fig, ax_sig_ref, ax_norm = create_raw_data_figure(precession_time_range, num_steps)
     # raw_fig, axes_pack = plt.subplots(1, 2, figsize=kpl.figsize_extralarge)
     run_indicator_text = "Run #{}/{}"
     text = run_indicator_text.format(0, num_runs)
@@ -869,9 +869,6 @@ def main_with_cxn(
         "timestamp": timestamp,
         "timeElapsed": timeElapsed,
         "nv_sig": nv_sig,
-        "nv_sig-units": tool_belt.get_nv_sig_units(cxn),
-        "spin_readout_dur": spin_readout_dur,
-        "spin_readout_dur-units": "ns",
         "uwave_freq": uwave_freq,
         "uwave_freq-units": "GHz",
         "uwave_power": uwave_power,
@@ -884,14 +881,13 @@ def main_with_cxn(
         "uwave_pi_on_2_pulse-units": "ns",
         "precession_time_range": precession_time_range,
         "precession_time_range-units": "ns",
+        "taus": taus.tolist(),
         "state": state.name,
         "num_steps": num_steps,
         "num_reps": num_reps,
         "num_runs": num_runs,
-        "taus": taus.tolist(),
         "tau_index_master_list": tau_index_master_list,
         "opti_coords_list": opti_coords_list,
-        "opti_coords_list-units": "V",
         "sig_counts": sig_counts.astype(int).tolist(),
         "sig_counts-units": "counts",
         "ref_counts": ref_counts.astype(int).tolist(),
@@ -905,7 +901,7 @@ def main_with_cxn(
     file_path = tool_belt.get_file_path(__file__, timestamp, nv_name)
     tool_belt.save_figure(raw_fig, file_path)
     tool_belt.save_raw_data(raw_data, file_path)
-    tool_belt.save_data_csv(file_path, taus/1000, norm_avg_sig, 'Free precession times (us)', 'Normalized fluorescence' )
+    tool_belt.save_data_csv(file_path, taus*2/1000, norm_avg_sig, 'Free precession times, T (us)', 'Normalized fluorescence' )
 
     # %% Fit and save figs
     try:

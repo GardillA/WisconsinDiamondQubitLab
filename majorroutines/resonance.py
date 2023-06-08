@@ -112,6 +112,7 @@ def main_with_cxn(cxn, nv_sig,  freq_center, freq_range,
 
     # %% Collect the data
 
+    startFunctionTime = time.time()
     # Start 'Press enter to stop...'
     tool_belt.init_safe_stop()
     
@@ -279,32 +280,33 @@ def main_with_cxn(cxn, nv_sig,  freq_center, freq_range,
 
     tool_belt.reset_cfm(cxn)
 
+    endFunctionTime = time.time()
+
+    timeElapsed = endFunctionTime - startFunctionTime
     timestamp = tool_belt.get_time_stamp()
 
     data = {'timestamp': timestamp,
+            'timeElapsed': timeElapsed,
                'nv_sig': nv_sig,
-               # 'nv_sig-units': tool_belt.get_nv_sig_units(),
-               'opti_coords_list': opti_coords_list,
-               'opti_coords_list-units': 'V',
                'freq_center': freq_center,
                'freq_center-units': 'GHz',
                'freq_range': freq_range,
                'freq_range-units': 'GHz',
+               'uwave_power': uwave_power,
+               'uwave_power-units': 'dBm',
                'num_steps': num_steps,
                'num_runs': num_runs,
                'freq_ind_master_list': freq_ind_master_list,
-               'uwave_power': uwave_power,
-               'uwave_power-units': 'dBm',
-               'spin_readout_dur': spin_readout_dur,
-               'spin_readout_dur-units': 'ns',
+               'opti_coords_list': opti_coords_list,
+               'opti_coords_list-units': 'V',
                'sig_counts': sig_counts.astype(int).tolist(),
                'sig_counts-units': 'counts',
                'ref_counts': ref_counts.astype(int).tolist(),
                'ref_counts-units': 'counts',
                'norm_avg_sig': norm_avg_sig.astype(float).tolist(),
                'norm_avg_sig-units': 'arb',
-#               'norm_avg_sig_ste': norm_avg_sig_ste.astype(float).tolist(),
-#               'norm_avg_sig_ste-units': 'arb',
+              'norm_avg_sig_ste': norm_avg_sig_ste.astype(float).tolist(),
+              'norm_avg_sig_ste-units': 'arb',
                }
 
     nv_name = nv_sig['name']

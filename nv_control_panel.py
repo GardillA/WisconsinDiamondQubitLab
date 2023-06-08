@@ -18,7 +18,7 @@ use file 5/5/2022
 import labrad
 import utils.positioning as positioning
 import utils.tool_belt as tool_belt
-import utils.common as common
+# import utils.common as common
 import majorroutines.image_sample as image_sample
 import majorroutines.optimize as optimize
 import majorroutines.stationary_count as stationary_count
@@ -91,10 +91,10 @@ def do_image_sample(nv_sig, scan_size='medium',close_plot=False):
         return 
     if scan_size == 'huge':
         scan_range = 1.4#0.6 # large scan
-        num_steps = 80
+        num_steps = 140
     elif scan_size == 'big':
         scan_range = .8 # large scan
-        num_steps = 50
+        num_steps = 80
     elif scan_size == 'bigger-highres':
         scan_range = 1.# large scan
         num_steps = 100
@@ -106,7 +106,7 @@ def do_image_sample(nv_sig, scan_size='medium',close_plot=False):
         num_steps = 30
     elif scan_size == 'small':
         scan_range = 0.15 # large scan
-        num_steps = 30
+        num_steps = 15
     elif scan_size == 'big-ish':
         scan_range = 0.8
         num_steps = 60
@@ -188,7 +188,7 @@ def do_pulsed_resonance(nv_sig, freq_center=2.87, freq_range=0.2,num_runs=30,clo
     num_steps = 51
     num_reps = 2e4
     # num_runs = runs
-    uwave_power = 14.5
+    uwave_power = 14
     uwave_pulse_dur = int(nv_sig["rabi_LOW"]/2)
 
     pulsed_resonance.main(
@@ -203,8 +203,39 @@ def do_pulsed_resonance(nv_sig, freq_center=2.87, freq_range=0.2,num_runs=30,clo
         opti_nv_sig = nv_sig,
         close_plot=close_plot
     )
+    
+def do_optimize_magnet_angle(nv_sig):
+    num_angle_steps = 6
+    angle_range = [0, 180]
+    freq_center = 2.87
+    freq_range= 0.2
+    num_freq_steps = 75
+    num_freq_runs = 5
+    
+    # Pulsed
+    uwave_power = 14
+    uwave_pulse_dur = 64/2
+    num_freq_reps = int(1e4)
+    
+    # CW
+    #uwave_power = -5
+    #uwave_pulse_dur = None
+    #num_freq_reps = None
+    
+    
+    angle = optimize_magnet_angle.main(
+        nv_sig,
+        angle_range, 
+        num_angle_steps,
+        freq_center, 
+        freq_range,
+        num_freq_steps,
+        num_freq_reps, 
+        num_freq_runs,
+        uwave_power, 
+        uwave_pulse_dur)
 
-
+    return angle
 def do_rabi(nv_sig,  state, uwave_time_range=[0, 200], num_steps = 51, num_reps = 2e4, num_runs=20,close_plot=False):
 
     num_reps = int(num_reps)
@@ -322,9 +353,9 @@ if __name__ == '__main__':
         "imaging_readout_dur": 1e7,
         "collection_filter": "630_lp",
         
-        "magnet_angle": 60, 
-        "resonance_LOW":2.8467 ,"rabi_LOW": 80.2, "uwave_power_LOW": 15,  # 15.5 max. units is dBm
-        "resonance_HIGH": 2.937 , "rabi_HIGH": 100.0, "uwave_power_HIGH": 14.5, 
+        "magnet_angle": 20, 
+        "resonance_LOW":2.8457 ,"rabi_LOW": 60, "uwave_power_LOW": 14,  # 15.5 max. units is dBm
+        "resonance_HIGH": 2.904 , "rabi_HIGH": 60, "uwave_power_HIGH": 14, 
         'norm_style':NormStyle.SINGLE_VALUED}  # 14.5 max. units is dBm
     
     nv_sig = nv_sig
@@ -365,17 +396,18 @@ if __name__ == '__main__':
         # nv_sig['disable_opt']=True
         # do_stationary_count(nv_sig, )
         
-        # do_pulsed_resonance(nv_sig, freq_center=2.87, freq_range=0.25,num_runs=5)
+        # do_optimize_magnet_angle(nv_sig)
+        # do_pulsed_resonance(nv_sig, freq_center=2.87, freq_range=0.2,num_runs=5)
         # mangles = [0,30,60,90,120,150]
         # for m in mangles:
         #     nv_sig['magnet_angle'] = m
         #     do_resonance(nv_sig, 2.87, 0.25, num_runs = 15)
         # nv_sig['disable_opt']=True
-        # do_resonance(nv_sig, 2.78, 0.1,num_steps=51,num_runs=2)
+        # do_resonance(nv_sig, 2.87, 0.2,num_steps=101,num_runs=15)
         # do_resonance_state(nv_sig , States.LOW)
                 
         # start_time = time.time()
-        # do_rabi(nv_sig,  States.LOW, uwave_time_range=[0, 150],num_runs=2)
+        # do_rabi(nv_sig,  States.LOW, uwave_time_range=[0, 200],num_runs=5)
         # end_time = time.time()
         # elapsed_time = end_time - start_time
         # print(elapsed_time)
@@ -383,7 +415,7 @@ if __name__ == '__main__':
         
         # detunings=[-3]
         # for d in detunings:
-        #     do_ramsey(nv_sig, set_detuning=d,num_runs=50, precession_time_range = [0, 1.75 * 10 ** 3],num_steps = 71)  
+            # do_ramsey(nv_sig, set_detuning=d,num_runs=50, precession_time_range = [0, 1.75 * 10 ** 3],num_steps = 71)  
        
         # do_spin_echo(nv_sig,echo_time_range = [0, 110 * 10 ** 3], num_steps=71, num_runs=50) 
         pass
