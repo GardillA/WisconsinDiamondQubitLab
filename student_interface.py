@@ -87,7 +87,7 @@ if __name__ == "__main__":
         ### Take confocal image
         ### xy scans can be ['small', 'medium', 'big-ish', 'big', 'huge']
         # nv.do_image_sample(nv_sig,  scan_size='small')
-        # nv.do_image_sample(nv_sig, scan_size='medium') 
+        nv.do_image_sample(nv_sig, scan_size='medium') 
         # nv.do_image_sample(nv_sig, scan_size='big')
         # nv.do_image_sample(nv_sig,  scan_size='big-ish')
         # nv.do_image_sample(nv_sig, scan_size='huge')
@@ -106,7 +106,7 @@ if __name__ == "__main__":
         # mpowers = [-10,-8,-6,-4,-2,0,2,4,6,8,10,12,14,15]
         # for i in mpowers:
         #     nv_sig["uwave_power_LOW"]=i
-        nv.do_rabi(nv_sig,  States.LOW , uwave_time_range=[0, 200], num_runs=20, num_steps=51, num_reps=2e4)
+        # nv.do_rabi(nv_sig,  States.LOW , uwave_time_range=[0, 200], num_runs=20, num_steps=51, num_reps=2e4)
         # nv.do_rabi(nv_sig,  States.HIGH, uwave_time_range=[0, 200], num_runs=20, num_steps=51, num_reps=2e4)
         
         

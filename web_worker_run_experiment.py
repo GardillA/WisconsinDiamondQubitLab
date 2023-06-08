@@ -139,10 +139,11 @@ if __name__ == "__main__":
         
         
         if args.experiment_type == 'auto-tracker':
+            #haystack_fname='2023_05_31-11_21_50-WiQD-nv1_XY' add the file into this file
             nv.do_auto_check_location(nv_sig)
         
         elif args.experiment_type == "image":
-            fname = nv.do_image_sample(nv_sig, scan_size=args.image_size, close_plot=True)
+            fname = nv.do_image_sample(nv_sig, scan_size=args.image_size, um_plot = True, close_plot=True)
             # print("Image fname: ",fname)
         elif args.experiment_type == "optimize":
             nv.do_optimize(nv_sig, close_plot=True)

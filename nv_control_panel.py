@@ -83,7 +83,7 @@ def do_auto_check_location(nv_sig,close_plot=False):
     
     
 
-def do_image_sample(nv_sig, scan_size='medium',close_plot=False):
+def do_image_sample(nv_sig, scan_size='medium', um_plot = False, close_plot=False):
     scan_options=['huge','medium','big-ish','small','small-ish','needle','haystack','big','test','bigger-highres']
     if scan_size not in scan_options:
     #     raise Exception():
@@ -121,7 +121,7 @@ def do_image_sample(nv_sig, scan_size='medium',close_plot=False):
         num_steps = 120
         
     # For now we only support square scans so pass scan_range twice
-    fname = image_sample.main(nv_sig, scan_range, scan_range, num_steps,close_plot=close_plot)
+    fname = image_sample.main(nv_sig, scan_range, scan_range, num_steps,um_plot, close_plot=close_plot)
     return fname
 
 def do_image_sample_xz(nv_sig, scan_size='medium'):
@@ -336,7 +336,7 @@ if __name__ == '__main__':
     
         
     nv_sig = {
-        "coords":[ 6.20,1.97,3.53], #  
+        "coords":[6.232, 1.917,3.53], #  
         "name": "{}-nv1".format(sample_name,),
         "expected_count_rate":15,
         "disable_opt":False,
@@ -364,21 +364,21 @@ if __name__ == '__main__':
     try:
 
         # with labrad.connect() as cxn:
-        #     positioning.set_drift(cxn,np.array([0, 0, 0.10]))
+            # positioning.set_drift(cxn,np.array([0, 0, 0]))
             # print(positioning.get_drift(cxn))
         # positioning.set_xyz (labrad.connect(), [5,5,5])
         
         # tool_belt.laser_on_no_cxn('cobolt_515') # turn the laser on
         # tool_belt.laser_off_no_cxn('cobolt_515') # turn the laser on
         
-        do_auto_check_location(nv_sig,close_plot=False)
+        # do_auto_check_location(nv_sig,close_plot=False)
 
         
         # do_image_sample(nv_sig, scan_size='small')
         # do_image_sample(nv_sig,  scan_size='needle')
-        # do_image_sample(nv_sig,  scan_size='medium')
+        # do_image_sample(nv_sig,  scan_size='medium', um_plot = False)
         # do_optimize(nv_sig)
-        # do_image_sample(nv_sig,  scan_size='haystack')
+        do_image_sample(nv_sig,  scan_size='haystack')
         # do_image_sample(nv_sig,  scan_size='big')
         # do_image_sample(nv_sig,  scan_size='small-ish')
         # do_image_sample(nv_sig,  scan_size='bigger-highres')

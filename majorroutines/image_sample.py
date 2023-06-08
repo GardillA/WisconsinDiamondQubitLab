@@ -39,38 +39,38 @@ def populate_img_array(valsToAdd, imgArray, writePos):
             The xDim x yDim array of fluorescence counts
         writePos: tuple(int)
             The last x, y write position on the image array. [] will default
-            to the bottom right corner.
+            to the bottom left corner.
     """
     yDim = imgArray.shape[0]
     xDim = imgArray.shape[1]
-
     if len(writePos) == 0:
-        writePos[:] = [xDim, yDim - 1]
+        # writePos[:] = [xDim, yDim - 1]
+        writePos[:] = [-1, yDim - 1 ]
 
     xPos = writePos[0]
     yPos = writePos[1]
 
     # Figure out what direction we're heading
-    headingLeft = (yDim - 1 - yPos) % 2 == 0
+    headingRight = (yDim - 1 - yPos) % 2 == 0
 
     for val in valsToAdd:
-        if headingLeft:
-            # Determine if we're at the left x edge
-            if xPos == 0:
-                yPos = yPos - 1
-                imgArray[yPos, xPos] = val
-                headingLeft = not headingLeft  # Flip directions
-            else:
-                xPos = xPos - 1
-                imgArray[yPos, xPos] = val
-        else:
+        if headingRight:
             # Determine if we're at the right x edge
             if xPos == xDim - 1:
                 yPos = yPos - 1
                 imgArray[yPos, xPos] = val
-                headingLeft = not headingLeft  # Flip directions
+                headingRight = not headingRight  # Flip directions
             else:
                 xPos = xPos + 1
+                imgArray[yPos, xPos] = val
+        else:
+            # Determine if we're at the left x edge
+            if xPos == 0:
+                yPos = yPos - 1
+                imgArray[yPos, xPos] = val
+                headingRight = not headingRight  # Flip directions
+            else:
+                xPos = xPos - 1
                 imgArray[yPos, xPos] = val
     writePos[:] = [xPos, yPos]
 
@@ -82,7 +82,7 @@ def main(
     x_range,
     y_range,
     num_steps,
-    um_scaled=False,
+    um_plot=False,
     nv_minus_init=False,
     vmin=None,
     vmax=None,
@@ -97,7 +97,7 @@ def main(
             x_range,
             y_range,
             num_steps,
-            um_scaled,
+            um_plot,
             nv_minus_init,
             vmin,
             vmax,
@@ -114,7 +114,7 @@ def main_with_cxn(
     x_range,
     y_range,
     num_steps,
-    um_scaled=False,
+    um_plot=False,
     nv_minus_init=False,
     vmin=None,
     vmax=None,
@@ -164,7 +164,7 @@ def main_with_cxn(
     # Get the scale in um per unit
     xy_scale = common.get_registry_entry(cxn, "xy_nm_per_unit", dir_path)
     if xy_scale == -1:
-        um_scaled = False
+        um_plot = False
     else:
         xy_scale /= 1000
         
@@ -275,27 +275,35 @@ def main_with_cxn(
     ### Set up the image display
     
     # kpl.init_kplotlib(font_size=kpl.Size.SMALL, latex=False)
-    
-    if um_scaled:
-        extent = [el * xy_scale for el in extent]
+    if um_plot:
+        extent = [extent[1] * xy_scale, extent[0] * xy_scale,
+                  extent[2] * xy_scale, extent[3] * xy_scale]
+        set_title = 'Scanning Confocal Image'
+        set_cbar_label = r"Fluorescence rate (counts / s $\times 10^3$)"
+        # extent = [el * xy_scale for el in extent]
+        
+        
         axes_labels = ["um", "um"]
     elif xy_units is not None:
         axes_labels = [xy_units, xy_units]
+        set_title =  f"{scan_type} image under {readout_laser}, {readout_us} us readout"
+        set_cbar_label = "kcps"
         
     
-    title = f"{scan_type} image under {readout_laser}, {readout_us} us readout"
             
     kpl.init_kplotlib(font_size=kpl.Size.SMALL, latex=False)
 
     fig, ax = plt.subplots()
+    
+        
     if scan_type == 'XZ':
         kpl.imshow(
             ax,
             img_array_kcps,
-            title=title,
+            title=set_title,
             x_label=axes_labels[0],
             y_label=axes_labels[1],
-            cbar_label="kcps",
+            cbar_label=set_cbar_label,
             extent=extent,
             vmin=vmin,
             vmax=vmax,
@@ -305,10 +313,10 @@ def main_with_cxn(
         kpl.imshow(
             ax,
             img_array_kcps,
-            title=title,
+            title=set_title,
             x_label=axes_labels[0],
             y_label=axes_labels[1],
-            cbar_label="kcps",
+            cbar_label=set_cbar_label,
             extent=extent,
             vmin=vmin,
             vmax=vmax,
@@ -428,7 +436,7 @@ def main_with_cxn(
                 'scan_type': scan_type,
                 'readout': readout,
                 'readout-units': 'ns',
-                "title": title,
+                "title": set_title,
                 'x_positions_1d': x_positions_1d.tolist(),
                 'x_positions_1d-units': pos_units,
                 'y_positions_1d': y_positions_1d.tolist(),

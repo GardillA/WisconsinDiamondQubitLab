@@ -329,8 +329,8 @@ def get_scan_grid_2d(
     x_half_pixel = (coords_1_1d[1] - coords_1_1d[0]) / 2
     y_half_pixel = (coords_2_1d[1] - coords_2_1d[0]) / 2
     img_extent = [
-        x_high + x_half_pixel,
         x_low - x_half_pixel,
+        x_high + x_half_pixel,
         y_low - y_half_pixel,
         y_high + y_half_pixel,
     ]

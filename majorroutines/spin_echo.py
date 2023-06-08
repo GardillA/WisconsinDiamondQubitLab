@@ -271,8 +271,8 @@ def bessel_like(tau, offset, revival_time, decay_time, amplitude):
     Based on spin echo signal from J. Maze et al, Nature 455 p. 644 (2008)
     '''
     two_pi = 2 * numpy.pi
-    bessel_arg = amplitude*numpy.sin(two_pi*tau/(revival_time * 4))**2
-    return 0.5 * (1 + j0(bessel_arg))
+    bessel_arg = amplitude*numpy.sin(two_pi*tau/(revival_time * 2))**2
+    return 0.5 * (1 + j0(bessel_arg))# * numpy.exp(-(tau/decay_time)**3)
 
 def fit_data(data,revival_time_guess=None,num_revivals_guess=None):
 
@@ -299,7 +299,7 @@ def fit_data(data,revival_time_guess=None,num_revivals_guess=None):
 
     T = 2*taus
 
-    fit_func = quartic
+    fit_func = bessel_like
 
     # %% Normalization and uncertainty
     
@@ -361,79 +361,96 @@ def fit_data(data,revival_time_guess=None,num_revivals_guess=None):
     max_bounds_tests = []
     best_scaled_chi_sq = None
     best_popt = None
+    
+    
+    # for freq in dominant_freqs:
 
-    for freq in dominant_freqs:
-
-        if revival_time_guess == None:
-            revival_time = 1 / freq
-        else:
-            revival_time = revival_time_guess
+    #     if revival_time_guess == None:
+    #         revival_time = 1 / freq
+    #     else:
+    #         revival_time = revival_time_guess
             
 
-        if num_revivals_guess == None:
-            num_revivals = round(2*max_precession_dur / revival_time)
-        else:
-            num_revivals = num_revivals_guess -1
+    #     if num_revivals_guess == None:
+    #         num_revivals = round(2*max_precession_dur / revival_time)
+    #     else:
+    #         num_revivals = num_revivals_guess -1
             
-        # print(num_revivals)
-        amplitudes = [amplitude for el in range(0, int(1.0 + num_revivals))]
-        # print('amps',amplitudes)
-        # print(num_revivals)
+    #     # print(num_revivals)
+    #     amplitudes = [amplitude for el in range(0, int(1.0 + num_revivals))]
+    #     # print('amps',amplitudes)
+    #     # print(num_revivals)
 
-        revival_time_us = revival_time / 1000
-        init_params = [
-            offset,
-            revival_time_us,
-            decay_time_us,
-            *amplitudes,
-        ]
-        min_bounds = (0.5, 0.0, 0.0, *[0.0 for el in amplitudes])
-        max_bounds = (
-            1.0,
-            max_precession_dur_us,
-            max_precession_dur_us,
-            *[0.3 for el in amplitudes],
-        )
-        min_bounds_tests.append(min_bounds)
-        max_bounds_tests.append(max_bounds)
-        init_params_tests.append(init_params)
-        # print(freq)
-        # print(init_params)
+    #     revival_time_us = revival_time / 1000
+    #     init_params = [
+    #         offset,
+    #         revival_time_us,
+    #         decay_time_us,
+    #         *amplitudes,
+    #     ]
+    #     min_bounds = (0.5, 0.0, 0.0, *[0.0 for el in amplitudes])
+    #     max_bounds = (
+    #         1.0,
+    #         max_precession_dur_us,
+    #         max_precession_dur_us,
+    #         *[0.3 for el in amplitudes],
+    #     )
+    #     min_bounds_tests.append(min_bounds)
+    #     max_bounds_tests.append(max_bounds)
+    #     init_params_tests.append(init_params)
+    #     # print(freq)
+    #     # print(init_params)
 
-        try:
-            popt, pcov = curve_fit(
-                fit_func,
-                T_us,
-                norm_avg_sig,
-                sigma=norm_avg_sig_ste,
-                absolute_sigma=True,
-                p0=init_params,
-                bounds=(min_bounds, max_bounds),
-            )
-            # print(popt)
+    #     try:
+    #         popt, pcov = curve_fit(
+    #             fit_func,
+    #             T_us,
+    #             norm_avg_sig,
+    #             sigma=norm_avg_sig_ste,
+    #             absolute_sigma=True,
+    #             p0=init_params,
+    #             bounds=(min_bounds, max_bounds),
+    #         )
+    #         print(popt)
 
-            fit_func_lambda = lambda tau: fit_func(tau, *popt)
-            residuals = fit_func_lambda(T_us) - norm_avg_sig
-            chi_sq = numpy.sum((residuals ** 2) / (norm_avg_sig_ste ** 2))
-            scaled_chi_sq = chi_sq * len(popt)
-            # print(scaled_chi_sq)
-            # print('test1',popt)
-            if best_scaled_chi_sq is None or (
-                scaled_chi_sq < best_scaled_chi_sq
-            ):
-                # print('here')
-                best_scaled_chi_sq = scaled_chi_sq
-                best_popt = popt
-                # print('here')
-                # print('test1',best_popt)
+    #         fit_func_lambda = lambda tau: fit_func(tau, *popt)
+    #         residuals = fit_func_lambda(T_us) - norm_avg_sig
+    #         chi_sq = numpy.sum((residuals ** 2) / (norm_avg_sig_ste ** 2))
+    #         scaled_chi_sq = chi_sq * len(popt)
+    #         # print(scaled_chi_sq)
+    #         # print('test1',popt)
+    #         if best_scaled_chi_sq is None or (
+    #             scaled_chi_sq < best_scaled_chi_sq
+    #         ):
+    #             # print('here')
+    #             best_scaled_chi_sq = scaled_chi_sq
+    #             best_popt = popt
+    #             # print('here')
+    #             # print('test1',best_popt)
 
-        except Exception as e:
-            print(e)
+    #     except Exception as e:
+    #         print(e)
             
     # print(popt)
 
-    popt = best_popt
-    # print(popt)
+
+    # (tau, offset, revival_time, decay_time, amplitude)
+    init_params  =[10, 62, 300, 0.2]
+    popt, pcov = curve_fit(
+        fit_func,
+        T_us,
+        norm_avg_sig,
+        sigma=norm_avg_sig_ste,
+        absolute_sigma=True,
+        p0=init_params,
+        # bounds=(min_bounds, max_bounds),
+    )
+    
+    # popt = best_popt
+    # popt = [8.68027049e-01, 3.01352188e+01, 1.32313879e+01, 1.07308384e-01,
+    #  2.54793237e-21, 1.06943689e-01, 1.43395268e-02, 1.34177465e-01,
+    #  4.63857465e-02, 1.04520229e-01]
+    print(popt)
     # popt[1] = 35
     popt[1] *= 1000
     popt[2] *= 1000
@@ -930,7 +947,7 @@ def main_with_cxn(
 
 if __name__ == "__main__":
 
-    file_name = "2023_02_28-15_07_30-E6-nv1"
+    file_name = "2023_02_28-15_38_15-E6-nv1"
     
     data = tool_belt.get_raw_data(file_name)
     nv_name = data['nv_sig']["name"]
