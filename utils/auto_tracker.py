@@ -30,19 +30,34 @@ def convert_to_8bit(img, min_val=0, max_val=255):
 def get_img_extent(data):
     x_voltages = data['x_positions_1d']
     y_voltages = data['y_positions_1d']
-    
     x_low = x_voltages[0]
     x_high = x_voltages[-1]
     y_low = y_voltages[0]
     y_high = y_voltages[-1]
 
     half_pixel_size = (x_voltages[1] - x_voltages[0]) / 2
-    img_extent = [x_high + half_pixel_size, x_low - half_pixel_size,
+    img_extent = [x_low - half_pixel_size, x_high + half_pixel_size,
                   y_low - half_pixel_size, y_high + half_pixel_size]
     return img_extent
 
 
 def get_shift(nv_sig, haystack_file, needle_file, close_plot=False):
+    '''
+    This routine will take a "needle" file and use it as a template to 
+    find it's relative position in a "haystack" file. The two image files have 
+    to have the same resolution (V / pixels) to work.
+    
+    It will return the shift in X and Y of the needle file with respect to the
+    central coordinates of the haystack file.
+    
+    This is intended to be used for a large haystack file that is centered on 
+    an NV of interest. The autotracker can then be run with a needle scan
+    to find the offset from the original position. The opposite sign of the 
+    x and y shifts should be added to the drift.
+    
+    Ex: this fundtion returns an x_shift = 0.04 and y_shift = -0.05, then the 
+    values of -0.04 and 0.05 should be added to the x and y drift, respectively.
+    '''
     
     diff_lim_spot_diam = 0.015  # expected st dev of the gaussian in volts
     
@@ -51,15 +66,11 @@ def get_shift(nv_sig, haystack_file, needle_file, close_plot=False):
     haystack_data = tool_belt.get_raw_data(haystack_file)
     haystack_x_range = haystack_data['x_range']
     haystack_num_steps = haystack_data['num_steps']
-    haystack_pos_coords = np.array(haystack_data['nv_sig']['coords'])
-    current_pos_coords = np.array(nv_sig['coords'])
-    manual_coor_shift = current_pos_coords-haystack_pos_coords
     
     x_voltages = haystack_data['x_positions_1d']
     y_voltages = haystack_data['y_positions_1d']
     
     haystack_img_extent = get_img_extent(haystack_data)
-    
     og_center_x_volts = (x_voltages[-1] + x_voltages[0])/2
     og_center_y_volts = (y_voltages[-1] + y_voltages[0])/2
     
@@ -72,6 +83,7 @@ def get_shift(nv_sig, haystack_file, needle_file, close_plot=False):
     haystack_img_array = np.array(haystack_data['img_array'])
     haystack_img_array = convert_to_8bit(haystack_img_array)
     
+    # Blur the haystack image wit ha Gaussian Blur
     haystack_img_array = cv2.GaussianBlur(haystack_img_array, (5, 5), 0)
     
     ####################### Initial calculations #######################
@@ -106,24 +118,23 @@ def get_shift(nv_sig, haystack_file, needle_file, close_plot=False):
     min_val, max_val, min_loc, max_loc = cv2.minMaxLoc(res)
     top_left = max_loc
     bottom_right = (top_left[0] + w, top_left[1] + h)
-    # print(top_left, bottom_right)
+    
     center_x = int( w/2 + top_left[0] )
     center_y = int( h/2 + top_left[1] )
     
-    if x_voltages[1] > x_voltages[0]:
-        x_voltages.reverse()
-        if y_voltages[1] > y_voltages[0]:
-            y_voltages.reverse()
-    # print(y_voltages)
-    center_x_volts = x_voltages[center_x] + volts_per_pixel/2
-    center_y_volts = y_voltages[center_y] + volts_per_pixel/2
+    # if x_voltages[1] > x_voltages[0]:
+    #     x_voltages.reverse()
+    if y_voltages[1] > y_voltages[0]:
+        y_voltages.reverse()
+    center_x_volts = x_voltages[center_x]# + volts_per_pixel/2
+    center_y_volts = y_voltages[center_y]# + volts_per_pixel/2
     # print(center_x_volts,center_y_volts)
     # print(center_x_volts)
     # print(og_center_x_volts)
 
     # print(manual_coor_shift)
-    shift_x_volts = round(-center_x_volts + og_center_x_volts,4) 
-    shift_y_volts = round(-center_y_volts + og_center_y_volts,4)
+    shift_x_volts = round(center_x_volts - og_center_x_volts,4) 
+    shift_y_volts = round(center_y_volts - og_center_y_volts,4)
     
     processed_img_array = np.copy(haystack_img_array)
     processed_img_array = cv2.cvtColor(processed_img_array, cv2.COLOR_GRAY2RGB)
@@ -175,8 +186,9 @@ def get_shift(nv_sig, haystack_file, needle_file, close_plot=False):
 if __name__ == '__main__':
     
     ####################### Files #######################
-    needle_file = '2023_05_25-11_58_34-E6test-nv1_XY'
-    haystack_file = '2023_05_25-12_01_18-E6test-nv1_XY'
+    needle_file = '2023_06_09-10_16_53-WiQD-nv1_XY'
+    # needle_file = '2023_06_09-10_12_12-WiQD-nv1_XY'
+    haystack_file = '2023_06_08-16_09_16-WiQD-nv1_XY'
     data_needle = tool_belt.get_raw_data(needle_file)
     nv_sig= data_needle['nv_sig']
     

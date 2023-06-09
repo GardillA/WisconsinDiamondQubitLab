@@ -39,18 +39,18 @@ import csv
 
 def do_auto_check_location(nv_sig,close_plot=False):
     
-    haystack_fname='2023_05_31-11_21_50-WiQD-nv1_XY'
+    haystack_fname='2023_06_08-16_09_16-WiQD-nv1_XY'
     
     # collect an image that is smaller than haystack image and has same resolution
     needle_fname = do_image_sample(nv_sig,scan_size='needle',close_plot=close_plot)
     
     #run the auto tracker image processing to locate needle image in haystack image
     x_shift, y_shift = auto_tracker.get_shift(nv_sig, haystack_fname, needle_fname,close_plot=close_plot)
-    
+    print(x_shift, y_shift)
     # add the shift of the two images to the current drift
     with labrad.connect() as cxn:
         drift = positioning.get_drift(cxn)
-        new_drift = [drift[0] + x_shift, drift[1]+ y_shift, drift[2]]
+        new_drift = [drift[0] - x_shift, drift[1] - y_shift, drift[2]]
         positioning.set_drift(cxn, new_drift)
         
     # With updated drift, optimize on NV to accurately find drift in all three dimensions
@@ -336,7 +336,7 @@ if __name__ == '__main__':
     
         
     nv_sig = {
-        "coords":[6.232, 1.917,3.53], #  
+        "coords":[6.212, 1.921, 3.53], #  
         "name": "{}-nv1".format(sample_name,),
         "expected_count_rate":15,
         "disable_opt":False,
@@ -364,21 +364,21 @@ if __name__ == '__main__':
     try:
 
         # with labrad.connect() as cxn:
-            # positioning.set_drift(cxn,np.array([0, 0, 0]))
+        #     positioning.set_drift(cxn,np.array([0, 0, 0]))
             # print(positioning.get_drift(cxn))
         # positioning.set_xyz (labrad.connect(), [5,5,5])
         
         # tool_belt.laser_on_no_cxn('cobolt_515') # turn the laser on
         # tool_belt.laser_off_no_cxn('cobolt_515') # turn the laser on
         
-        # do_auto_check_location(nv_sig,close_plot=False)
+        do_auto_check_location(nv_sig,close_plot=False)
 
         
         # do_image_sample(nv_sig, scan_size='small')
         # do_image_sample(nv_sig,  scan_size='needle')
         # do_image_sample(nv_sig,  scan_size='medium', um_plot = False)
         # do_optimize(nv_sig)
-        do_image_sample(nv_sig,  scan_size='haystack')
+        # do_image_sample(nv_sig,  scan_size='haystack')
         # do_image_sample(nv_sig,  scan_size='big')
         # do_image_sample(nv_sig,  scan_size='small-ish')
         # do_image_sample(nv_sig,  scan_size='bigger-highres')

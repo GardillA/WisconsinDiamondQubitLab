@@ -466,9 +466,10 @@ def main_with_cxn(
 
 if __name__ == "__main__":
 
-    file_name = '2023_01_23-09_29_21-E6test-nv1_XY'
+    file_name = '2023_06_08-16_09_16-WiQD-nv1_XY'
     data = tool_belt.get_raw_data(file_name)
     img_array = np.array(data["img_array"])
+    print(img_array)
     readout = data["readout"]
     img_array_kcps = (img_array / 1000) / (readout * 1e-9)
     img_array_kcps[np.where(img_array_kcps<0)]=np.nan
