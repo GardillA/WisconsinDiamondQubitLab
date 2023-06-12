@@ -256,18 +256,11 @@ def mag_B_from_revival_time(revival_time, revival_time_ste=None):
         return mag_B
 
 
-def quartic(tau, offset, revival_time, decay_time, *amplitudes):
-
-    tally = offset
-    # print(len(amplitudes))
-    for ind in range(0, len(amplitudes)):
-        exp_part = numpy.exp(-(((tau - ind * revival_time) / decay_time) ** 4))
-        tally += amplitudes[ind] * exp_part
-    return tally
-
-
-def quartic_new(tau, offset, revival_time, decay_time, T2, n_revivals):
-
+def spin_echo_fit(tau, offset, revival_time, decay_time, T2, n_revivals):
+    '''
+    Fit from supplement of B. J. Shields et al. "Efficient Readout of a Single Spin State in Diamond 
+    via Spin-to-Charge Conversion" PRL (2015)
+    '''
     summed_term = 0
     amplitude = 1 - offset
     # print(n_revivals)
@@ -276,13 +269,6 @@ def quartic_new(tau, offset, revival_time, decay_time, T2, n_revivals):
         summed_term += term
     return offset + amplitude * numpy.exp(-(tau/T2)**3) * summed_term
 
-def bessel_like(tau, offset, revival_time, decay_time, alpha, amp, b):
-    '''
-    Based on spin echo signal from J. Maze et al, Nature 455 p. 644 (2008)
-    '''
-    two_pi = 2 * numpy.pi
-    bessel_arg = alpha*numpy.sin(two_pi*tau/(revival_time * 2))**2
-    return amp * (b + j0(bessel_arg)) * numpy.exp(-(tau/decay_time)**3)
 
 def fit_data(data,revival_time_guess=None,num_revivals_guess=None):
 
@@ -305,7 +291,7 @@ def fit_data(data,revival_time_guess=None,num_revivals_guess=None):
     T = 2*taus
     T_step = 2*tau_step
 
-    fit_func = quartic_new
+    fit_func = spin_echo_fit
 
     # Normalization and uncertainty
     
