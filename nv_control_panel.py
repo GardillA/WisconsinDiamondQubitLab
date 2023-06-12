@@ -59,27 +59,27 @@ def do_auto_check_location(nv_sig,close_plot=False):
     opti_coords, opti_count_rate = do_optimize(nv_sig_copy,plot_data=False,close_plot=close_plot)
     
     # saving drift as it accumulates
-    folder_dir = 'C:/Users/student/Documents/LAB_DATA/pc_nvcenter-pc/branch_instructional-lab-v2'
-    file =  '2023_06-drift_tracking.csv'
-    with open(folder_dir + '/' + file, 'a', newline='') as f:
-        # create the csv writer
-        writer = csv.writer(f)
+    # folder_dir = 'C:/Users/student/Documents/LAB_DATA/pc_nvcenter-pc/branch_instructional-lab-v2'
+    # file =  '2023_06-drift_tracking.csv'
+    # with open(folder_dir + '/' + file, 'a', newline='') as f:
+    #     # create the csv writer
+    #     writer = csv.writer(f)
         
-        timestamp = tool_belt.get_time_stamp()
-        current_time = time.time()
+    #     timestamp = tool_belt.get_time_stamp()
+    #     current_time = time.time()
     
-        with labrad.connect() as cxn:
-            final_drift = positioning.get_drift(cxn)
-        header = [final_drift[0], final_drift[1], final_drift[2], opti_count_rate, timestamp, current_time]
-        writer.writerow(header)
+    #     with labrad.connect() as cxn:
+    #         final_drift = positioning.get_drift(cxn)
+    #     header = [final_drift[0], final_drift[1], final_drift[2], opti_count_rate, timestamp, current_time]
+    #     writer.writerow(header)
         
         
-    # if opti_count_rate > 8:
-    #     return
-    # else:
-    #     raise RuntimeError('counts too low at opti coords')
+    if opti_count_rate > 8:
+        return
+    else:
+        raise RuntimeError('counts too low at opti coords')
      
-    # nv_sig['expected_count_rate'] = opti_count_rate
+    nv_sig['expected_count_rate'] = opti_count_rate
     
     
 
@@ -371,12 +371,12 @@ if __name__ == '__main__':
         # tool_belt.laser_on_no_cxn('cobolt_515') # turn the laser on
         # tool_belt.laser_off_no_cxn('cobolt_515') # turn the laser on
         
-        do_auto_check_location(nv_sig,close_plot=False)
+        # do_auto_check_location(nv_sig,close_plot=False)
 
         
         # do_image_sample(nv_sig, scan_size='small')
         # do_image_sample(nv_sig,  scan_size='needle')
-        # do_image_sample(nv_sig,  scan_size='medium', um_plot = False)
+        # do_image_sample(nv_sig,  scan_size='medium', um_plot = True)
         # do_optimize(nv_sig)
         # do_image_sample(nv_sig,  scan_size='haystack')
         # do_image_sample(nv_sig,  scan_size='big')
@@ -411,7 +411,7 @@ if __name__ == '__main__':
         # end_time = time.time()
         # elapsed_time = end_time - start_time
         # print(elapsed_time)
-        # do_rabi(nv_sig,  States.HIGH, uwave_time_range=[0, 250],num_runs=30)
+        do_rabi(nv_sig,  States.HIGH, uwave_time_range=[0, 250],num_runs=30)
         
         # detunings=[-3]
         # for d in detunings:

@@ -64,8 +64,8 @@ def create_raw_data_figure(
     # Plot setup
     fig, axes_pack = plt.subplots(1, 2, figsize=kpl.figsize_extralarge)
     ax_sig_ref, ax_norm = axes_pack
-    ax_sig_ref.set_xlabel(r"$T = 2\tau$ ($\mathrm{\mu s}$)")
-    ax_norm.set_xlabel(r"$T = 2\tau$ ($\mathrm{\mu s}$)")
+    ax_sig_ref.set_xlabel(r"$Precession time, T = 2\tau$ ($\mathrm{\mu s}$)")
+    ax_norm.set_xlabel(r"Precession time, $T = 2\tau$ ($\mathrm{\mu s}$)")
     ax_sig_ref.set_ylabel(r"Fluorescence rate (counts / s $\times 10^3$)")
     ax_norm.set_ylabel("Normalized fluorescence")
     fig.suptitle("Spin Echo")
@@ -266,24 +266,29 @@ def quartic(tau, offset, revival_time, decay_time, *amplitudes):
     return tally
 
 
-def bessel_like(tau, offset, revival_time, decay_time, amplitude):
+def quartic_new(tau, offset, revival_time, decay_time, T2, n_revivals):
+
+    summed_term = 0
+    amplitude = 1 - offset
+    # print(n_revivals)
+    for ind in range(0, int(n_revivals)):
+        term = numpy.exp(-(((tau - ind * revival_time) / decay_time) ** 2))
+        summed_term += term
+    return offset + amplitude * numpy.exp(-(tau/T2)**3) * summed_term
+
+def bessel_like(tau, offset, revival_time, decay_time, alpha, amp, b):
     '''
     Based on spin echo signal from J. Maze et al, Nature 455 p. 644 (2008)
     '''
     two_pi = 2 * numpy.pi
-    bessel_arg = amplitude*numpy.sin(two_pi*tau/(revival_time * 2))**2
-    return 0.5 * (1 + j0(bessel_arg))# * numpy.exp(-(tau/decay_time)**3)
+    bessel_arg = alpha*numpy.sin(two_pi*tau/(revival_time * 2))**2
+    return amp * (b + j0(bessel_arg)) * numpy.exp(-(tau/decay_time)**3)
 
 def fit_data(data,revival_time_guess=None,num_revivals_guess=None):
 
     precession_dur_range = data["precession_time_range"]
     num_steps = data["num_steps"]
-    num_runs = data["num_runs"]
-
-    # Get the pi pulse duration
-    state = data["state"]
     nv_sig = data["nv_sig"]
-    # rabi_period = nv_sig["rabi_{}".format(state)]
 
     # %% Set up
 
@@ -298,10 +303,11 @@ def fit_data(data,revival_time_guess=None,num_revivals_guess=None):
     )
 
     T = 2*taus
+    T_step = 2*tau_step
 
-    fit_func = bessel_like
+    fit_func = quartic_new
 
-    # %% Normalization and uncertainty
+    # Normalization and uncertainty
     
     try:
         norm_avg_sig = data['norm_avg_sig']
@@ -310,7 +316,6 @@ def fit_data(data,revival_time_guess=None,num_revivals_guess=None):
         sig_counts = data["sig_counts"]
         ref_counts = data["ref_counts"]
         num_reps = data['num_reps']
-        nv_sig = data['nv_sig']
         spin_readout_dur = nv_sig['spin_readout_dur']
         norm_style = nv_sig['norm_style']
         
@@ -323,35 +328,39 @@ def fit_data(data,revival_time_guess=None,num_revivals_guess=None):
         ) = ret_vals
 
 
-    # %% Estimated fit parameters
+    # Estimated fit parameters
 
     # Assume that the bulk of points are the floor and that revivals take
     # us back to 1.0
-    amplitude = 1.0 - numpy.average(norm_avg_sig)
-    offset = 1.0 - amplitude
-    decay_time = 4500.0
+    offset = numpy.average(norm_avg_sig)
+    decay_time = 1e3
+    T2 = 100e3
 
     # To estimate the revival frequency let's find the highest peak in the FFT
     transform = numpy.fft.rfft(norm_avg_sig)
-    freqs = numpy.fft.rfftfreq(num_steps, d=tau_step)
+    freqs = numpy.fft.rfftfreq(num_steps, d=T_step)
     transform_mag = numpy.absolute(transform)
     
     fig, ax = plt.subplots()
-    ax.plot(freqs, transform_mag)
+    ax.plot(freqs[1:]*1e6, transform_mag[1:])
+    ax.set_xlabel('Frequency (MHz)')
+    ax.set_ylabel('FFT Magnitude')
 
     # For a nice spin echo there may be two dominant frequencies of similar
     # magnitudes. We'll find the right one by brute force
     sorted_inds = numpy.argsort(transform_mag[2:])
     dominant_freqs = [freqs[sorted_inds[-1] + 1], freqs[sorted_inds[-2] + 1]]
     
-    # %% Fit
+    
+    # Fit
 
     # The fit doesn't like dealing with vary large numbers. We'll convert to
     # us here and then convert back to ns after the fit for consistency.
 
     T_us = T / 1000
     decay_time_us = decay_time / 1000
-    max_precession_dur_us = max_precession_dur / 1000
+    T2_us = T2 / 1000
+    max_precession_dur_us = 2*max_precession_dur / 1000
 
     # Get the init params we want to test and try them out. Compare them with
     # a scaled chi squared: the sum of squared residuals times the number
@@ -360,101 +369,75 @@ def fit_data(data,revival_time_guess=None,num_revivals_guess=None):
     min_bounds_tests = []
     max_bounds_tests = []
     best_scaled_chi_sq = None
+    best_num_revivals = None
     best_popt = None
     
+    for freq in dominant_freqs:
+
+        if revival_time_guess == None:
+            revival_time = 1 / freq
+        else:
+            revival_time = revival_time_guess
+            
+
+        if num_revivals_guess == None:
+            num_revivals = round(2*max_precession_dur / revival_time) + 1
+        else:
+            num_revivals = num_revivals_guess
+        
+        revival_time_us = revival_time / 1000
+        init_params = [
+            offset,
+            revival_time_us,
+            decay_time_us,
+            T2_us, 
+        ]
+        min_bounds = (0.5, 0.0, 0.0, 0.0)
+        max_bounds = (
+            1.0,
+            max_precession_dur_us,
+            max_precession_dur_us,
+            max_precession_dur_us,
+        )
+        min_bounds_tests.append(min_bounds)
+        max_bounds_tests.append(max_bounds)
+        init_params_tests.append(init_params)
+        
+        try:
+            fit_func_n = lambda tau, offset, revival_time, decay_time, T2: fit_func(tau, offset, revival_time, 
+                                    decay_time, T2, num_revivals)
+            # try:
+            popt, pcov = curve_fit(
+                fit_func_n,
+                T_us,
+                norm_avg_sig,
+                sigma=norm_avg_sig_ste,
+                absolute_sigma=True,
+                p0=init_params,
+                # bounds=(min_bounds, max_bounds),
+            )
     
-    # for freq in dominant_freqs:
-
-    #     if revival_time_guess == None:
-    #         revival_time = 1 / freq
-    #     else:
-    #         revival_time = revival_time_guess
-            
-
-    #     if num_revivals_guess == None:
-    #         num_revivals = round(2*max_precession_dur / revival_time)
-    #     else:
-    #         num_revivals = num_revivals_guess -1
-            
-    #     # print(num_revivals)
-    #     amplitudes = [amplitude for el in range(0, int(1.0 + num_revivals))]
-    #     # print('amps',amplitudes)
-    #     # print(num_revivals)
-
-    #     revival_time_us = revival_time / 1000
-    #     init_params = [
-    #         offset,
-    #         revival_time_us,
-    #         decay_time_us,
-    #         *amplitudes,
-    #     ]
-    #     min_bounds = (0.5, 0.0, 0.0, *[0.0 for el in amplitudes])
-    #     max_bounds = (
-    #         1.0,
-    #         max_precession_dur_us,
-    #         max_precession_dur_us,
-    #         *[0.3 for el in amplitudes],
-    #     )
-    #     min_bounds_tests.append(min_bounds)
-    #     max_bounds_tests.append(max_bounds)
-    #     init_params_tests.append(init_params)
-    #     # print(freq)
-    #     # print(init_params)
-
-    #     try:
-    #         popt, pcov = curve_fit(
-    #             fit_func,
-    #             T_us,
-    #             norm_avg_sig,
-    #             sigma=norm_avg_sig_ste,
-    #             absolute_sigma=True,
-    #             p0=init_params,
-    #             bounds=(min_bounds, max_bounds),
-    #         )
-    #         print(popt)
-
-    #         fit_func_lambda = lambda tau: fit_func(tau, *popt)
-    #         residuals = fit_func_lambda(T_us) - norm_avg_sig
-    #         chi_sq = numpy.sum((residuals ** 2) / (norm_avg_sig_ste ** 2))
-    #         scaled_chi_sq = chi_sq * len(popt)
-    #         # print(scaled_chi_sq)
-    #         # print('test1',popt)
-    #         if best_scaled_chi_sq is None or (
-    #             scaled_chi_sq < best_scaled_chi_sq
-    #         ):
-    #             # print('here')
-    #             best_scaled_chi_sq = scaled_chi_sq
-    #             best_popt = popt
-    #             # print('here')
-    #             # print('test1',best_popt)
-
-    #     except Exception as e:
-    #         print(e)
-            
-    # print(popt)
-
-
-    # (tau, offset, revival_time, decay_time, amplitude)
-    init_params  =[10, 62, 300, 0.2]
-    popt, pcov = curve_fit(
-        fit_func,
-        T_us,
-        norm_avg_sig,
-        sigma=norm_avg_sig_ste,
-        absolute_sigma=True,
-        p0=init_params,
-        # bounds=(min_bounds, max_bounds),
-    )
+            fit_func_lambda = lambda tau: fit_func_n(tau, *popt)
+            residuals = fit_func_lambda(T_us) - norm_avg_sig
+            chi_sq = numpy.sum((numpy.array(residuals) ** 2) / (numpy.array(norm_avg_sig_ste) ** 2))
+            scaled_chi_sq = chi_sq * len(popt)
+            if best_scaled_chi_sq is None or (
+                scaled_chi_sq < best_scaled_chi_sq
+            ):
+                best_scaled_chi_sq = scaled_chi_sq
+                best_num_revivals = num_revivals
+                best_popt = popt
     
-    # popt = best_popt
-    # popt = [8.68027049e-01, 3.01352188e+01, 1.32313879e+01, 1.07308384e-01,
-    #  2.54793237e-21, 1.06943689e-01, 1.43395268e-02, 1.34177465e-01,
-    #  4.63857465e-02, 1.04520229e-01]
-    print(popt)
-    # popt[1] = 35
+        except Exception as e:
+            print(e)
+            
+    popt = best_popt
+    popt = numpy.append(popt, best_num_revivals)
+    # print(numpy.append(popt, best_num_revivals))
     popt[1] *= 1000
     popt[2] *= 1000
-
+    popt[3] *= 1000
+    print(popt)
     revival_time = popt[1]
     stes = numpy.sqrt(numpy.diag(pcov))
     if (fit_func is not None) and (popt is not None):
@@ -494,7 +477,6 @@ def create_fit_figure(
     linspace_T = numpy.linspace(
         min(T), max(T), num=1000)
 
-
     fit_fig, ax = plt.subplots(1,1,figsize=kpl.figsize_large)
 
     kpl.plot_points(ax, T / 1000, norm_avg_sig, color=KplColors.BLUE, label="data")
@@ -505,20 +487,43 @@ def create_fit_figure(
         color=KplColors.RED,
         label="fit",
     )
-    ax.set_xlabel(r"$T = 2\tau$ ($\mathrm{\mu s}$)")
+    ax.set_xlabel(r"Precession time, $T = 2\tau$ ($\mathrm{\mu s}$)")
     ax.set_ylabel("Normalized fluorescence")
     fit_fig.suptitle('Spin Echo experiment')
-    ax.legend()
+    # ax.legend()
 
     revival_time = popt[1]
+    decay_time = popt[2]
+    T_2 = popt[3]
+    
+    # uni_nu = "\u03BD"
+    eq_text = r"$(1 - A) + A e^{-(T / T_2)^3} \sum_0^n e^{-(( T - n T_r) / T_d)^2}$"
+    # size = kpl.Size.SMALL
+    # if decay > 2*max_uwave_time:
+    #     base_text = "A = {:.3f} \n1/{} = {:.1f} ns \nd >> {:.0f} ns"
+    #     text = base_text.format(Amp,uni_nu, 1/popt[1], max_uwave_time)
+    # else:
+    #     base_text = "A = {:.3f} \n1/{} = {:.1f} ns \nd = {:.1f} us"
+    #     text = base_text.format(Amp,uni_nu, 1/popt[1], decay/1e3)
+    
+    
     text_popt = "\n".join(
         (
-            r"$\tau_{r}=$%.3f $\mathrm{\mu s}$" % (revival_time / 1000),
-            r"$B=$%.3f G" % (mag_B_from_revival_time(revival_time)),
+            r"$A=$%.2f" % (popt[0]),
+            r"$T_{d}=$%.3f $\mathrm{\mu s}$" % (decay_time / 1000),
+            r"$T_{r}=$%.3f $\mathrm{\mu s}$" % (revival_time / 1000),
+            r"$T_{2}=$%.3f $\mathrm{\mu s}$" % (T_2 / 1000),
         ))
 
+    text_B = "\n".join(
+        (
+            "Estimated D.C magnetic field",
+            r"from $T_r$ is $B=$%.3f G" % (mag_B_from_revival_time(revival_time)),
+        ))
     
-    kpl.anchored_text(ax, text_popt, kpl.Loc.LOWER_RIGHT, size=kpl.Size.SMALL)
+    kpl.anchored_text(ax, eq_text, kpl.Loc.UPPER_RIGHT, size=kpl.Size.SMALL)
+    kpl.anchored_text(ax, text_popt, kpl.Loc.LOWER_LEFT, size=kpl.Size.SMALL)
+    kpl.anchored_text(ax, text_B, kpl.Loc.LOWER_RIGHT, size=kpl.Size.SMALL)
 
     return fit_fig
 
@@ -922,7 +927,7 @@ def main_with_cxn(
 
     # %% Fit and save figs
     try:
-        ret_vals = fit_data(raw_data)
+        ret_vals = fit_data(raw_data, revival_time_guess=60 * 1000)
         # ret_vals = plot_resonances_vs_theta_B(raw_data)
         fit_func, popt, stes, fit_fig = ret_vals
         theta_B_deg = None
@@ -948,15 +953,15 @@ def main_with_cxn(
 if __name__ == "__main__":
 
     file_name = "2023_02_28-15_38_15-E6-nv1"
+    file_name = '2023_01_31-21_37_45-E6-nv1'
     
     data = tool_belt.get_raw_data(file_name)
     nv_name = data['nv_sig']["name"]
     timestamp = data['timestamp']
 
-    revival_time_guess = 33 * 1000
-    num_peaks = 7
+    revival_time_guess = 60 * 1000
     
-    ret_vals = fit_data(data, revival_time_guess=revival_time_guess, num_revivals_guess=num_peaks)
+    ret_vals = fit_data(data, revival_time_guess=revival_time_guess)
     
     
         

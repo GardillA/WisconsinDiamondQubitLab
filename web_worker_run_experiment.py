@@ -162,15 +162,14 @@ if __name__ == "__main__":
             #and the frequency
             if args.experiment_type != "ESR":
                 set_uwave_power_dbm = tool_belt.mW_to_dBm(args.set_uwave_power)
-                resonance = args.resonance
-                nv_sig_run = copy.deepcopy(nv_sig)
-                nv_sig_run['resonance_LOW'] = args.set_frequency
+                # nv_sig_run = copy.deepcopy(nv_sig)
+                nv_sig_run['resonance_LOW'] = args.set_uwave_frequency
                 nv_sig_run['uwave_power_LOW'] = set_uwave_power_dbm
                 
                 #If the MW experiment is not ESR or Rabi, they will need the pi pulse time
                 if args.experiment_type != "rabi":
                     set_pi_pulse = args.set_pi_pulse_period
-                    #or code expects the rabi period (or twice the pi pulse duration), so we will provide that
+                    #our code expects the rabi period (or twice the pi pulse duration), so we will provide that
                     nv_sig_run['rabi_LOW'] = 2*set_pi_pulse
             
             
@@ -194,7 +193,13 @@ if __name__ == "__main__":
                              num_steps=args.num_test_points, num_runs=args.num_test_averages, close_plot=True)
             
             elif args.experiment_type == "spin-echo":
-                nv.do_spin_echo(nv_sig_run,state=state_input,echo_time_range=[0,1000*args.test_echo_time_max], 
+                # users will input the total precession time, and our code expects
+                # the time to be half the total precession time, T = 2*tau.
+                
+                # So divide the user's input by two to use as the input to our function
+                
+                spin_echo_tau_max = args.test_echo_time_max / 2
+                nv.do_spin_echo(nv_sig_run,state=state_input,echo_time_range=[0,spin_echo_tau_max], 
                                 num_steps=args.num_test_points, num_runs=args.num_test_averages, close_plot=True)
         
         else:

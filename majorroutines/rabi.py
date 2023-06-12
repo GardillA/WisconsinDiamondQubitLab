@@ -111,6 +111,7 @@ def create_fit_figure(uwave_time_range, num_steps, uwave_freq, norm_avg_sig,
 
     uni_nu = "\u03BD"
     eq_text = r"$(1 - A) + A \cos ( 2 \pi \nu \tau ) e^{-\tau / d}$"
+    freq_text = "Set Frequency {} GHz".format(uwave_freq)
     size = kpl.Size.SMALL
     if decay > 2*max_uwave_time:
         base_text = "A = {:.3f} \n1/{} = {:.1f} ns \nd >> {:.0f} ns"
@@ -119,6 +120,7 @@ def create_fit_figure(uwave_time_range, num_steps, uwave_freq, norm_avg_sig,
         base_text = "A = {:.3f} \n1/{} = {:.1f} ns \nd = {:.1f} us"
         text = base_text.format(Amp,uni_nu, 1/popt[1], decay/1e3)
     kpl.anchored_text(ax, text, kpl.Loc.LOWER_LEFT, size=size)
+    kpl.anchored_text(ax, freq_text, kpl.Loc.LOWER_RIGHT, size=size)
     kpl.anchored_text(ax, eq_text, kpl.Loc.UPPER_RIGHT, size=size)
     
     return fig, ax, fit_func, popt, pcov
@@ -255,7 +257,7 @@ def main_with_cxn(cxn, nv_sig,  uwave_time_range, state,
     start_timestamp = tool_belt.get_time_stamp()
 
     # %% Initial calculations and setup
-
+    print(nv_sig['resonance_{}'.format(state.name)])
     uwave_freq = nv_sig['resonance_{}'.format(state.name)]
     uwave_power = nv_sig['uwave_power_{}'.format(state.name)]
 
