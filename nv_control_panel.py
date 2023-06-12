@@ -18,7 +18,7 @@ use file 5/5/2022
 import labrad
 import utils.positioning as positioning
 import utils.tool_belt as tool_belt
-# import utils.common as common
+import utils.common as common
 import majorroutines.image_sample as image_sample
 import majorroutines.optimize as optimize
 import majorroutines.stationary_count as stationary_count
@@ -37,16 +37,18 @@ import csv
 
 # %% Major Routines
 
-def do_auto_check_location(nv_sig,close_plot=False):
+def do_auto_check_location(nv_sig,close_plot=False, haystack_fname = None):
     
-    haystack_fname='2023_06_08-16_09_16-WiQD-nv1_XY'
+    if not haystack_fname:
+        with labrad.connect() as cxn:
+            haystack_fname = common.get_registry_entry(cxn,"haystack_fname" , ["", "Config", "AutoTracking"])
     
     # collect an image that is smaller than haystack image and has same resolution
     needle_fname = do_image_sample(nv_sig,scan_size='needle',close_plot=close_plot)
     
     #run the auto tracker image processing to locate needle image in haystack image
     x_shift, y_shift = auto_tracker.get_shift(nv_sig, haystack_fname, needle_fname,close_plot=close_plot)
-    print(x_shift, y_shift)
+    
     # add the shift of the two images to the current drift
     with labrad.connect() as cxn:
         drift = positioning.get_drift(cxn)
@@ -254,7 +256,7 @@ def do_rabi(nv_sig,  state, uwave_time_range=[0, 200], num_steps = 51, num_reps 
 
 
 def do_ramsey(nv_sig,  precession_time_range = [0, 0.2 * 10 ** 4], num_steps = 101,
-                      set_detuning=10,num_reps = 2e4, num_runs=10, state=States.LOW,close_plot=False):
+                      set_detuning=10,num_reps = 2e4, num_runs=10, state=States.LOW,close_plot=False, do_fft  =True):
 
     detuning = set_detuning  # MHz
     # precession_time_range = [0, 1 * 10 ** 4]
@@ -272,7 +274,8 @@ def do_ramsey(nv_sig,  precession_time_range = [0, 0.2 * 10 ** 4], num_steps = 1
         num_runs,
         state,
         opti_nv_sig = nv_sig,
-        close_plot=close_plot
+        close_plot=close_plot,
+        do_fft = do_fft
     )
 
 
@@ -354,7 +357,7 @@ if __name__ == '__main__':
         "collection_filter": "630_lp",
         
         "magnet_angle": 20, 
-        "resonance_LOW":2.8457 ,"rabi_LOW": 60, "uwave_power_LOW": 14,  # 15.5 max. units is dBm
+        "resonance_LOW":2.844 ,"rabi_LOW": 60, "uwave_power_LOW": 14,  # 15.5 max. units is dBm
         "resonance_HIGH": 2.904 , "rabi_HIGH": 60, "uwave_power_HIGH": 14, 
         'norm_style':NormStyle.SINGLE_VALUED}  # 14.5 max. units is dBm
     
@@ -377,7 +380,7 @@ if __name__ == '__main__':
         # do_image_sample(nv_sig, scan_size='small')
         # do_image_sample(nv_sig,  scan_size='needle')
         # do_image_sample(nv_sig,  scan_size='medium', um_plot = True)
-        # do_optimize(nv_sig)
+        do_optimize(nv_sig)
         # do_image_sample(nv_sig,  scan_size='haystack')
         # do_image_sample(nv_sig,  scan_size='big')
         # do_image_sample(nv_sig,  scan_size='small-ish')
@@ -406,12 +409,8 @@ if __name__ == '__main__':
         # do_resonance(nv_sig, 2.87, 0.2,num_steps=101,num_runs=15)
         # do_resonance_state(nv_sig , States.LOW)
                 
-        # start_time = time.time()
         # do_rabi(nv_sig,  States.LOW, uwave_time_range=[0, 200],num_runs=5)
-        # end_time = time.time()
-        # elapsed_time = end_time - start_time
-        # print(elapsed_time)
-        do_rabi(nv_sig,  States.HIGH, uwave_time_range=[0, 250],num_runs=30)
+        # do_rabi(nv_sig,  States.HIGH, uwave_time_range=[0, 250],num_runs=30)
         
         # detunings=[-3]
         # for d in detunings:

@@ -240,7 +240,8 @@ def main(
     state=States.LOW,
     opti_nv_sig = None,
     one_precession_time = False,
-    close_plot=False
+    close_plot=False,
+    do_fft = True,
 ):
 
     with labrad.connect() as cxn:
@@ -255,7 +256,8 @@ def main(
             state,
             opti_nv_sig,
             one_precession_time,
-            close_plot
+            close_plot,
+            do_fft
         )
         return angle
 
@@ -271,7 +273,8 @@ def main_with_cxn(
     state=States.LOW,
     opti_nv_sig = None,
     one_precession_time = False,
-    close_plot=False
+    close_plot=False,
+    do_fft = True
 ):
 
     counter_server = tool_belt.get_server_counter(cxn)
@@ -650,8 +653,9 @@ def main_with_cxn(
                                precession_time_range, num_steps, detuning)
     
     # Save the fft figure
-    file_path_fft = tool_belt.get_file_path(__file__, timestamp, nv_sig["name"] + '_fft')
-    tool_belt.save_figure(fig_fft, file_path_fft)
+    if do_fft:
+        file_path_fft = tool_belt.get_file_path(__file__, timestamp, nv_sig["name"] + '_fft')
+        tool_belt.save_figure(fig_fft, file_path_fft)
 
     # Fit actual data
     fig_fit = fit_ramsey(norm_avg_sig,taus,  precession_time_range, FreqParams)

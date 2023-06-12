@@ -133,10 +133,10 @@ def create_fit_figure(
     elif len(popt) == 6:
         eq_text = r"$1 - A_1 e^{-(\nu - \nu_1) ^2 / (2\sigma_1 ^2)} - A_2 e^{-(\nu - \nu_2) ^2 / (2\sigma_2 ^2)}$"
         contrast, hwhm, freq = popt[0:3]
-        low_text =  "{}{} = {:.4f} GHz\n{}{} = {:.1f} MHz\nA{} = {:.3f}".format(
+        low_text =  "{}{} = {:.3f} GHz\n{}{} = {:.1f} MHz\nA{} = {:.3f}".format(
             uni_nu, uni_sub_1, freq, uni_sigma, uni_sub_1, hwhm, uni_sub_1,contrast  )
         contrast, hwhm, freq = popt[3:6]
-        high_text =  "{}{} = {:.4f} GHz\n{}{} = {:.1f} MHz\nA{} = {:.3f}".format(
+        high_text =  "{}{} = {:.3f} GHz\n{}{} = {:.1f} MHz\nA{} = {:.3f}".format(
             uni_nu, uni_sub_2, freq, uni_sigma, uni_sub_2, hwhm, uni_sub_2,contrast  )
     kpl.anchored_text(ax, eq_text, kpl.Loc.UPPER_RIGHT, size=size)
     if low_text is not None:

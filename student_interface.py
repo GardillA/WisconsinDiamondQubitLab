@@ -87,14 +87,14 @@ if __name__ == "__main__":
         ### Take confocal image
         ### xy scans can be ['small', 'medium', 'big-ish', 'big', 'huge']
         # nv.do_image_sample(nv_sig,  scan_size='small')
-        nv.do_image_sample(nv_sig, scan_size='medium') 
+        # nv.do_image_sample(nv_sig, scan_size='medium') 
         # nv.do_image_sample(nv_sig, scan_size='big')
         # nv.do_image_sample(nv_sig,  scan_size='big-ish')
         # nv.do_image_sample(nv_sig, scan_size='huge')
                 
         
         # Optimize on NV
-        # nv.do_optimize(nv_sig)
+        nv.do_optimize(nv_sig)
             
         
         ####### EXPERIMENT 1: CW electron spin resonance #######

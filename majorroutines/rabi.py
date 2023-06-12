@@ -246,7 +246,7 @@ def main_with_cxn(cxn, nv_sig,  uwave_time_range, state,
 
     counter_server = tool_belt.get_server_counter(cxn)
     pulsegen_server = tool_belt.get_server_pulse_gen(cxn)
-    arbwavegen_server = tool_belt.get_server_arb_wave_gen(cxn)
+    # arbwavegen_server = tool_belt.get_server_arb_wave_gen(cxn)
 
     tool_belt.reset_cfm(cxn)
     kpl.init_kplotlib()
@@ -257,7 +257,6 @@ def main_with_cxn(cxn, nv_sig,  uwave_time_range, state,
     start_timestamp = tool_belt.get_time_stamp()
 
     # %% Initial calculations and setup
-    print(nv_sig['resonance_{}'.format(state.name)])
     uwave_freq = nv_sig['resonance_{}'.format(state.name)]
     uwave_power = nv_sig['uwave_power_{}'.format(state.name)]
 
@@ -269,7 +268,7 @@ def main_with_cxn(cxn, nv_sig,  uwave_time_range, state,
     norm_style = nv_sig["norm_style"]
     polarization_time = nv_sig['spin_pol_dur']
     spin_readout_dur = nv_sig['spin_readout_dur']
-    readout_sec = spin_readout_dur / (10**9)
+    # readout_sec = spin_readout_dur / (10**9)
 
     # Array of times to sweep through
     # Must be ints since the pulse streamer only works with int64s
@@ -277,11 +276,6 @@ def main_with_cxn(cxn, nv_sig,  uwave_time_range, state,
     max_uwave_time = uwave_time_range[1]
     taus = numpy.linspace(min_uwave_time, max_uwave_time,
                           num=num_steps, dtype=numpy.int32)
-
-    # check if running external iq_mod with SRS
-    iq_key = False
-    if 'uwave_iq_{}'.format(state.name) in nv_sig:
-        iq_key = nv_sig['uwave_iq_{}'.format(state.name)]
 
     # Analyze the sequence
     num_reps = int(num_reps)
@@ -357,9 +351,6 @@ def main_with_cxn(cxn, nv_sig,  uwave_time_range, state,
         sig_gen_cxn = tool_belt.get_server_sig_gen(cxn, state)
         sig_gen_cxn.set_freq(uwave_freq)
         sig_gen_cxn.set_amp(uwave_power)
-        if iq_key:
-            sig_gen_cxn.load_iq()
-            # arbwavegen_server.load_arb_phases([0])
         sig_gen_cxn.uwave_on()
 
         

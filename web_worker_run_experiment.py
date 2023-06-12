@@ -17,8 +17,8 @@ os.environ['LABRADPASSWORD'] = ""
 import nv_control_panel as nv
 import utils.tool_belt as tool_belt
 from utils.tool_belt import States, NormStyle
-import labrad
-import time
+# import labrad
+# import time
 import sys
 import argparse
 from pathlib import Path
@@ -114,7 +114,7 @@ if __name__ == "__main__":
         'norm_style':NormStyle.SINGLE_VALUED,
 
         "collection_filter": "630_lp",
-        "magnet_angle": 0,
+        "magnet_angle": 20,
         "resonance_LOW":2.87,"rabi_LOW": 60,
         "uwave_power_LOW": 14, 
         "resonance_HIGH": 2.87,
@@ -139,12 +139,12 @@ if __name__ == "__main__":
         
         
         if args.experiment_type == 'auto-tracker':
-            #haystack_fname='2023_05_31-11_21_50-WiQD-nv1_XY' add the file into this file
+            # change haystack file name in labrad Config registry
             nv.do_auto_check_location(nv_sig)
         
         elif args.experiment_type == "image":
             fname = nv.do_image_sample(nv_sig, scan_size=args.image_size, um_plot = True, close_plot=True)
-            # print("Image fname: ",fname)
+            
         elif args.experiment_type == "optimize":
             nv.do_optimize(nv_sig, close_plot=True)
  
@@ -190,16 +190,15 @@ if __name__ == "__main__":
             
             elif args.experiment_type == "ramsey":
                 nv.do_ramsey(nv_sig_run,state=state_input,set_detuning=0,precession_time_range=[0,1000*args.test_precession_time_max], 
-                             num_steps=args.num_test_points, num_runs=args.num_test_averages, close_plot=True)
+                             num_steps=args.num_test_points, num_runs=args.num_test_averages, close_plot=True, do_fft = False)
             
             elif args.experiment_type == "spin-echo":
                 # users will input the total precession time, and our code expects
                 # the time to be half the total precession time, T = 2*tau.
                 
                 # So divide the user's input by two to use as the input to our function
-                
                 spin_echo_tau_max = args.test_echo_time_max / 2
-                nv.do_spin_echo(nv_sig_run,state=state_input,echo_time_range=[0,spin_echo_tau_max], 
+                nv.do_spin_echo(nv_sig_run,state=state_input,echo_time_range=[0,1000*spin_echo_tau_max], 
                                 num_steps=args.num_test_points, num_runs=args.num_test_averages, close_plot=True)
         
         else:
