@@ -256,7 +256,7 @@ def do_rabi(nv_sig,  state, uwave_time_range=[0, 200], num_steps = 51, num_reps 
 
 
 def do_ramsey(nv_sig,  precession_time_range = [0, 0.2 * 10 ** 4], num_steps = 101,
-                      set_detuning=10,num_reps = 2e4, num_runs=10, state=States.LOW,close_plot=False, do_fft  =True):
+                      set_detuning=0,num_reps = 2e4, num_runs=10, state=States.LOW,close_plot=False, do_fft  =True):
 
     detuning = set_detuning  # MHz
     # precession_time_range = [0, 1 * 10 ** 4]
