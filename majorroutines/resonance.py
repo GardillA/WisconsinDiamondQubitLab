@@ -30,14 +30,14 @@ import csv
 
 
 def main(nv_sig, freq_center, freq_range,
-         num_steps, num_runs, uwave_power, state=States.LOW, opti_nv_sig = None, close_plot=False):
+         num_steps, num_runs, uwave_power, state=States.LOW, opti_nv_sig = None, close_plot=False, widqol = False):
 
     with labrad.connect() as cxn:
-        main_with_cxn(cxn, nv_sig,  freq_center, freq_range,
-                      num_steps, num_runs, uwave_power, state, opti_nv_sig, close_plot)
+        return main_with_cxn(cxn, nv_sig,  freq_center, freq_range,
+                      num_steps, num_runs, uwave_power, state, opti_nv_sig, close_plot, widqol)
 
 def main_with_cxn(cxn, nv_sig,  freq_center, freq_range,
-                  num_steps, num_runs, uwave_power, state=States.LOW, opti_nv_sig = None, close_plot=False):
+                  num_steps, num_runs, uwave_power, state=States.LOW, opti_nv_sig = None, close_plot=False, widqol = False):
 
     kpl.init_kplotlib()
     
@@ -96,7 +96,7 @@ def main_with_cxn(cxn, nv_sig,  freq_center, freq_range,
     print('')
     print(tool_belt.get_expected_run_time_string(cxn,'resonance',period,num_steps,1,num_runs))
     print('')
-    
+    # return
     # Create raw data figure for incremental plotting
     raw_fig, ax_sig_ref, ax_norm = pulsed_resonance.create_raw_data_figure(
         freq_center, freq_range, num_steps
@@ -274,7 +274,7 @@ def main_with_cxn(cxn, nv_sig,  freq_center, freq_range,
             high_freq = round(popt[5],4)
             print('Low resonance: ',low_freq,'GHz') 
             print('High resonance: ',high_freq,'GHz')
-            print('Slitting = ',(high_freq-low_freq)*1000,'MHz')
+            print('Splitting = ',(high_freq-low_freq)*1000,'MHz')
 
     # %% Clean up and save the data
 
@@ -315,8 +315,9 @@ def main_with_cxn(cxn, nv_sig,  freq_center, freq_range,
     file_path = tool_belt.get_file_path(__file__, timestamp, nv_name)
     data_file_name = file_path.stem
     tool_belt.save_figure(raw_fig, file_path)
-
-    tool_belt.save_raw_data(data, file_path)
+    
+    if not widqol:
+        tool_belt.save_raw_data(data, file_path)
 
     if fit_success:
         file_path = tool_belt.get_file_path(__file__, timestamp, nv_name + "-fit")
@@ -339,7 +340,7 @@ def main_with_cxn(cxn, nv_sig,  freq_center, freq_range,
     if close_plot:
         plt.close()
 
-    return None, None
+    return  [low_freq, high_freq]
 
 
 def replot(file):

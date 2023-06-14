@@ -87,7 +87,8 @@ def main(
     vmin=None,
     vmax=None,
     scan_type='XY',
-    close_plot=False
+    close_plot=False,
+    widqol = False
 ):
 
     with labrad.connect() as cxn:
@@ -102,7 +103,8 @@ def main(
             vmin,
             vmax,
             scan_type,
-            close_plot
+            close_plot,
+            widqol
         )
 
     return fname
@@ -119,7 +121,8 @@ def main_with_cxn(
     vmin=None,
     vmax=None,
     scan_type='XY',
-    close_plot=False
+    close_plot=False,
+    widqol = False,
 ):
     
     ### Some initial setup
@@ -217,7 +220,7 @@ def main_with_cxn(
     print('')
     print(tool_belt.get_expected_run_time_string(cxn,'image_sample',period, total_num_samples, 1, 1))
     print('')
-        
+    # return
     ### Set up the xy_server (xyz_server if 'xz' scan_type)
 
     x_num_steps = num_steps
@@ -450,8 +453,9 @@ def main_with_cxn(
     filename = filePath.parts[len(filePath.parts)-1]
 
     tool_belt.save_figure(fig, filePath)
-    tool_belt.save_raw_data(rawData, filePath)
     
+    if not widqol:
+        tool_belt.save_raw_data(rawData, filePath)
     tool_belt.save_data_csv_scan(filePath, img_array)
     
     if close_plot:
@@ -466,7 +470,7 @@ def main_with_cxn(
 
 if __name__ == "__main__":
 
-    file_name = '2023_06_08-16_09_16-WiQD-nv1_XY'
+    file_name = '2023_06_13-15_21_26-WiQD-nv1_XY'
     data = tool_belt.get_raw_data(file_name)
     img_array = np.array(data["img_array"])
     print(img_array)

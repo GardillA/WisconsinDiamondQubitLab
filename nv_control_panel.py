@@ -85,7 +85,7 @@ def do_auto_check_location(nv_sig,close_plot=False, haystack_fname = None):
     
     
 
-def do_image_sample(nv_sig, scan_size='medium', um_plot = False, close_plot=False):
+def do_image_sample(nv_sig, scan_size='medium', um_plot = False, close_plot=False, widqol = False):
     scan_options=['huge','medium','big-ish','small','small-ish','needle','haystack','big','test','bigger-highres']
     if scan_size not in scan_options:
     #     raise Exception():
@@ -123,30 +123,10 @@ def do_image_sample(nv_sig, scan_size='medium', um_plot = False, close_plot=Fals
         num_steps = 120
         
     # For now we only support square scans so pass scan_range twice
-    fname = image_sample.main(nv_sig, scan_range, scan_range, num_steps,um_plot, close_plot=close_plot)
+    fname = image_sample.main(nv_sig, scan_range, scan_range, num_steps,um_plot, 
+                              close_plot=close_plot,
+                              widqol = widqol)
     return fname
-
-def do_image_sample_xz(nv_sig, scan_size='medium'):
-    
-    scan_options=['huge','medium','big-ish','small','small-ish','big','test','bigger-highres']
-    if scan_size not in scan_options:
-    #     raise Exception():
-        print('scan_size must be in: ', scan_options)
-        return 
-    if scan_size == 'huge':
-        scan_range = 1#0.6 # large scan
-        num_steps = 60
-    elif scan_size == 'big':
-        scan_range = .6 # large scan
-        num_steps = 30
-    elif scan_size == 'medium':
-        scan_range = 0.35 # large scan
-        num_steps = 30
-    elif scan_size == 'small':
-        scan_range = 0.1 # large scan
-        num_steps = 30
-    
-    image_sample.main(nv_sig, scan_range, scan_range, num_steps,scan_type='XZ')
 
 def do_optimize(nv_sig,set_to_opti_coords=False,save_data=True,plot_data=True,close_plot=False):
 
@@ -170,7 +150,8 @@ def do_stationary_count(nv_sig):
 
 
 
-def do_resonance(nv_sig,  freq_center=2.87, freq_range=0.2, uwave_power=-5.0, num_steps = 101, num_runs = 40,close_plot=False):
+def do_resonance(nv_sig,  freq_center=2.87, freq_range=0.2, uwave_power=-5.0, 
+                 num_steps = 101, num_runs = 40,close_plot=False, widqol = False):
     
     resonance.main(
         nv_sig,
@@ -181,7 +162,8 @@ def do_resonance(nv_sig,  freq_center=2.87, freq_range=0.2, uwave_power=-5.0, nu
         uwave_power,
         state=States.HIGH,
         opti_nv_sig = nv_sig,
-        close_plot=close_plot
+        close_plot=close_plot,
+        widqol = widqol
     )
 
 
@@ -208,21 +190,21 @@ def do_pulsed_resonance(nv_sig, freq_center=2.87, freq_range=0.2,num_runs=30,clo
     
 def do_optimize_magnet_angle(nv_sig):
     num_angle_steps = 6
-    angle_range = [0, 180]
+    angle_range = [0, 150]
     freq_center = 2.87
     freq_range= 0.2
     num_freq_steps = 75
     num_freq_runs = 5
     
     # Pulsed
-    uwave_power = 14
-    uwave_pulse_dur = 64/2
-    num_freq_reps = int(1e4)
+    # uwave_power = 14
+    # uwave_pulse_dur = 64/2
+    # num_freq_reps = int(1e4)
     
     # CW
-    #uwave_power = -5
-    #uwave_pulse_dur = None
-    #num_freq_reps = None
+    uwave_power = -5
+    uwave_pulse_dur = None
+    num_freq_reps = None
     
     
     angle = optimize_magnet_angle.main(
@@ -238,7 +220,7 @@ def do_optimize_magnet_angle(nv_sig):
         uwave_pulse_dur)
 
     return angle
-def do_rabi(nv_sig,  state, uwave_time_range=[0, 200], num_steps = 51, num_reps = 2e4, num_runs=20,close_plot=False):
+def do_rabi(nv_sig,  state, uwave_time_range=[0, 200], num_steps = 51, num_reps = 2e4, num_runs=20,close_plot=False, widqol = False):
 
     num_reps = int(num_reps)
 
@@ -250,7 +232,8 @@ def do_rabi(nv_sig,  state, uwave_time_range=[0, 200], num_steps = 51, num_reps 
         num_reps,
         num_runs,
         opti_nv_sig = nv_sig,
-        close_plot=close_plot
+        close_plot=close_plot,
+        widqol = widqol
     )
     nv_sig["rabi_{}".format(state.name)] = period
 
@@ -339,7 +322,7 @@ if __name__ == '__main__':
     
         
     nv_sig = {
-        "coords":[6.212, 1.921, 3.53], #  
+        "coords":[6.212, 1.921, 3.56], # 6.304, 1.94,    6.259, 2.09 # 6.21, 1.87
         "name": "{}-nv1".format(sample_name,),
         "expected_count_rate":15,
         "disable_opt":False,
@@ -356,7 +339,7 @@ if __name__ == '__main__':
         "imaging_readout_dur": 1e7,
         "collection_filter": "630_lp",
         
-        "magnet_angle": 20, 
+        "magnet_angle": 0, 
         "resonance_LOW":2.844 ,"rabi_LOW": 60, "uwave_power_LOW": 14,  # 15.5 max. units is dBm
         "resonance_HIGH": 2.904 , "rabi_HIGH": 60, "uwave_power_HIGH": 14, 
         'norm_style':NormStyle.SINGLE_VALUED}  # 14.5 max. units is dBm
@@ -379,18 +362,17 @@ if __name__ == '__main__':
         
         # do_image_sample(nv_sig, scan_size='small')
         # do_image_sample(nv_sig,  scan_size='needle')
-        # do_image_sample(nv_sig,  scan_size='medium', um_plot = True)
-        do_optimize(nv_sig)
+        # do_image_sample(nv_sig,  scan_size='medium', um_plot = False)
+        # do_optimize(nv_sig)
         # do_image_sample(nv_sig,  scan_size='haystack')
-        # do_image_sample(nv_sig,  scan_size='big')
+        # do_image_sample(nv_sig,  scan_size='big', um_plot = True)
         # do_image_sample(nv_sig,  scan_size='small-ish')
         # do_image_sample(nv_sig,  scan_size='bigger-highres')
         
         # do_image_sample(nv_sig,  scan_size='test')
         
         # do_image_sample(nv_sig,  scan_size='auto-tracker')
-        # do_image_sample(nv_sig, scan_size='big')
-        # do_image_sample_xz(nv_sig,scan_size='huge')
+        # do_image_sample(nv_sig, scan_size='huge')
         # z_list = np.arange(3.47,4.87,0.15)
         # for z in z_list:
         #     nv_sig['coords'][2]=z
@@ -406,7 +388,7 @@ if __name__ == '__main__':
         #     nv_sig['magnet_angle'] = m
         #     do_resonance(nv_sig, 2.87, 0.25, num_runs = 15)
         # nv_sig['disable_opt']=True
-        # do_resonance(nv_sig, 2.87, 0.2,num_steps=101,num_runs=15)
+        # do_resonance(nv_sig, 2.87, 0.2,num_steps=51,num_runs=10)
         # do_resonance_state(nv_sig , States.LOW)
                 
         # do_rabi(nv_sig,  States.LOW, uwave_time_range=[0, 200],num_runs=5)

@@ -143,7 +143,8 @@ if __name__ == "__main__":
             nv.do_auto_check_location(nv_sig)
         
         elif args.experiment_type == "image":
-            fname = nv.do_image_sample(nv_sig, scan_size=args.image_size, um_plot = True, close_plot=True)
+            fname = nv.do_image_sample(nv_sig, scan_size=args.image_size, 
+                           um_plot = True, close_plot=True, widqol = True)
             
         elif args.experiment_type == "optimize":
             nv.do_optimize(nv_sig, close_plot=True)
@@ -182,11 +183,11 @@ if __name__ == "__main__":
                 freq_center_ = freq_range_/2 + lower_freq_min
                 
                 nv.do_resonance(nv_sig_run, freq_center=freq_center_, freq_range=freq_range_, 
-                                num_steps=args.num_test_points, num_runs=args.num_test_averages, close_plot=True)
+                                num_steps=args.num_test_points, num_runs=args.num_test_averages, close_plot=True, widqol = True)
             
             elif args.experiment_type == "rabi":
                 nv.do_rabi(nv_sig_run,state=state_input,uwave_time_range=[0,args.test_uwave_time_max], 
-                           num_steps=args.num_test_points, num_runs=args.num_test_averages, close_plot=True)
+                           num_steps=args.num_test_points, num_runs=args.num_test_averages, close_plot=True, widqol = True)
             
             elif args.experiment_type == "ramsey":
                 nv.do_ramsey(nv_sig_run,state=state_input,set_detuning=0,precession_time_range=[0,1000*args.test_precession_time_max], 
