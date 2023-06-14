@@ -242,6 +242,7 @@ def main(
     one_precession_time = False,
     close_plot=False,
     do_fft = True,
+    widqol = False
 ):
 
     with labrad.connect() as cxn:
@@ -257,7 +258,8 @@ def main(
             opti_nv_sig,
             one_precession_time,
             close_plot,
-            do_fft
+            do_fft,
+            widqol
         )
         return angle
 
@@ -274,7 +276,8 @@ def main_with_cxn(
     opti_nv_sig = None,
     one_precession_time = False,
     close_plot=False,
-    do_fft = True
+    do_fft = True,
+    widqol =False
 ):
 
     counter_server = tool_belt.get_server_counter(cxn)
@@ -643,7 +646,8 @@ def main_with_cxn(
 
     file_path = tool_belt.get_file_path(__file__, timestamp, nv_sig["name"])
     tool_belt.save_figure(raw_fig, file_path)
-    tool_belt.save_raw_data(raw_data, file_path)
+    if not widqol:
+        tool_belt.save_raw_data(raw_data, file_path)
     tool_belt.save_data_csv(file_path, taus/1000, norm_avg_sig, 'Free precession times (us)', 'Normalized fluorescence' )
 
     # %% Fit and save figs

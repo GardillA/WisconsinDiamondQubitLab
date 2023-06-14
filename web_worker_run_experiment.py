@@ -191,7 +191,7 @@ if __name__ == "__main__":
             
             elif args.experiment_type == "ramsey":
                 nv.do_ramsey(nv_sig_run,state=state_input,set_detuning=0,precession_time_range=[0,1000*args.test_precession_time_max], 
-                             num_steps=args.num_test_points, num_runs=args.num_test_averages, close_plot=True, do_fft = False)
+                             num_steps=args.num_test_points, num_runs=args.num_test_averages, close_plot=True, do_fft = False, widqol = True)
             
             elif args.experiment_type == "spin-echo":
                 # users will input the total precession time, and our code expects
@@ -200,7 +200,7 @@ if __name__ == "__main__":
                 # So divide the user's input by two to use as the input to our function
                 spin_echo_tau_max = args.test_echo_time_max / 2
                 nv.do_spin_echo(nv_sig_run,state=state_input,echo_time_range=[0,1000*spin_echo_tau_max], 
-                                num_steps=args.num_test_points, num_runs=args.num_test_averages, close_plot=True)
+                                num_steps=args.num_test_points, num_runs=args.num_test_averages, close_plot=True, widqol = True)
         
         else:
             raise Exception("Unsupported experiment type: " + repr(args.experiment_type))

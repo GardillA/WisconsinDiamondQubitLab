@@ -94,7 +94,7 @@ if __name__ == "__main__":
                 
         
         # Optimize on NV
-        nv.do_optimize(nv_sig)
+        # nv.do_optimize(nv_sig)
             
         
         ####### EXPERIMENT 1: CW electron spin resonance #######

@@ -232,7 +232,8 @@ def main_with_cxn(cxn, nv_sig,  freq_center, freq_range,
         # the existing file with the latest version
         file_path = tool_belt.get_file_path(__file__, start_timestamp,
                                             nv_sig['name'], 'incremental')
-        tool_belt.save_raw_data(rawData, file_path)
+        if not widqol:
+            tool_belt.save_raw_data(rawData, file_path)
         
         tool_belt.save_figure(raw_fig, file_path)
 
@@ -263,7 +264,9 @@ def main_with_cxn(cxn, nv_sig,  freq_center, freq_range,
     except Exception:
         popt = []
         fit_success = False
-        
+    
+    low_freq = None
+    high_freq = None
     if fit_success:
         if len(popt) == 3:
             low_freq = round(popt[2],4)

@@ -524,7 +524,8 @@ def main(
     num_reps,
     num_runs,
     state=States.LOW,
-    close_plot=False
+    close_plot=False,
+    widqol = False
 ):
 
     with labrad.connect() as cxn:
@@ -536,7 +537,8 @@ def main(
             num_reps,
             num_runs,
             state,
-            close_plot
+            close_plot,
+            widqol
         )
         return angle
 
@@ -550,6 +552,7 @@ def main_with_cxn(
     num_runs,
     state=States.LOW,
     close_plot=False,
+    widqol = False
 ):
     
     kpl.init_kplotlib()
@@ -908,7 +911,8 @@ def main_with_cxn(
     nv_name = nv_sig["name"]
     file_path = tool_belt.get_file_path(__file__, timestamp, nv_name)
     tool_belt.save_figure(raw_fig, file_path)
-    tool_belt.save_raw_data(raw_data, file_path)
+    if not widqol:
+        tool_belt.save_raw_data(raw_data, file_path)
     tool_belt.save_data_csv(file_path, taus*2/1000, norm_avg_sig, 'Free precession times, T (us)', 'Normalized fluorescence' )
 
     # %% Fit and save figs

@@ -226,13 +226,13 @@ def simulate(uwave_time_range, freq, resonant_freq, contrast,
 def main(nv_sig, uwave_time_range, state,
          num_steps, num_reps, num_runs,
          opti_nv_sig = None,
-         return_popt=False,close_plot=False, widqlo = False):
+         return_popt=False,close_plot=False, widqol = False):
 
     with labrad.connect() as cxn:
         rabi_per, sig_counts, ref_counts, popt = main_with_cxn(cxn, nv_sig,
                                          uwave_time_range, state,
                                          num_steps, num_reps, num_runs,
-                                         opti_nv_sig,close_plot, widqlo)
+                                         opti_nv_sig,close_plot, widqol)
 
         if return_popt:
             return rabi_per, popt
@@ -242,7 +242,7 @@ def main(nv_sig, uwave_time_range, state,
 
 def main_with_cxn(cxn, nv_sig,  uwave_time_range, state,
                   num_steps, num_reps, num_runs,
-                  opti_nv_sig = None, close_plot=False, widqlo = False):
+                  opti_nv_sig = None, close_plot=False, widqol = False):
 
     counter_server = tool_belt.get_server_counter(cxn)
     pulsegen_server = tool_belt.get_server_pulse_gen(cxn)
@@ -529,7 +529,7 @@ def main_with_cxn(cxn, nv_sig,  uwave_time_range, state,
     if fit_success:
         file_path_fit = tool_belt.get_file_path(__file__, timestamp, nv_name + "-fit")
         tool_belt.save_figure(fit_fig, file_path_fit)
-    if not widqlo:
+    if not widqol:
         tool_belt.save_raw_data(raw_data, file_path)
     
     tool_belt.save_data_csv(file_path, taus, norm_avg_sig, 'Microwave duration (ns)', 'Normalized fluorescence' )
