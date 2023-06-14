@@ -133,7 +133,7 @@ if __name__ == "__main__":
         # tool_belt.set_drift([0.0, 0.0, 0.0]) 
         
         # Perform optimize, if counts are below a certain value, run autotracker to try to find the NV.
-        _, opti_count_rate = nv.do_optimize(nv_sig, close_plot=True)
+        _, opti_count_rate = nv.do_optimize(nv_sig,save_data = False, close_plot=True)
         if opti_count_rate < 8:
             nv.do_auto_check_location(nv_sig,close_plot=True)
         

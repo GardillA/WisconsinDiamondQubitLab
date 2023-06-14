@@ -58,7 +58,7 @@ def do_auto_check_location(nv_sig,close_plot=False, haystack_fname = None):
     # With updated drift, optimize on NV to accurately find drift in all three dimensions
     nv_sig_copy = copy.deepcopy(nv_sig)
     nv_sig_copy['expected_count_rate'] = None
-    opti_coords, opti_count_rate = do_optimize(nv_sig_copy,plot_data=False,close_plot=close_plot)
+    opti_coords, opti_count_rate = do_optimize(nv_sig_copy,plot_data=False,save_data = False, close_plot=close_plot)
     
     # saving drift as it accumulates
     # folder_dir = 'C:/Users/student/Documents/LAB_DATA/pc_nvcenter-pc/branch_instructional-lab-v2'
