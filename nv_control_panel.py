@@ -92,23 +92,23 @@ def do_image_sample(nv_sig, scan_size='medium', um_plot = False, close_plot=Fals
         print('scan_size must be in: ', scan_options)
         return 
     if scan_size == 'huge':
-        scan_range = 1.4#0.6 # large scan
-        num_steps = 140
+        scan_range = 1.5 # large scan
+        num_steps = 151
     elif scan_size == 'big':
-        scan_range = .8 # large scan
-        num_steps = 80
+        scan_range = .75 # large scan
+        num_steps = 76
     elif scan_size == 'bigger-highres':
         scan_range = 1.# large scan
         num_steps = 100
     elif scan_size == 'medium':
         scan_range = 0.4 # large scan
-        num_steps = 40
+        num_steps = 81
     elif scan_size == 'small-ish':
         scan_range = 0.3 # large scan
         num_steps = 30
     elif scan_size == 'small':
-        scan_range = 0.15 # large scan
-        num_steps = 15
+        scan_range = 0.1 # large scan
+        num_steps = 21
     elif scan_size == 'big-ish':
         scan_range = 0.8
         num_steps = 60
@@ -362,7 +362,7 @@ if __name__ == '__main__':
         # do_auto_check_location(nv_sig,close_plot=False)
 
         
-        do_image_sample(nv_sig, scan_size='small')
+        # do_image_sample(nv_sig, scan_size='small')
         # do_image_sample(nv_sig,  scan_size='needle')
         # do_image_sample(nv_sig,  scan_size='medium', um_plot = False)
         # do_optimize(nv_sig)
@@ -390,7 +390,7 @@ if __name__ == '__main__':
         #     nv_sig['magnet_angle'] = m
         #     do_resonance(nv_sig, 2.87, 0.25, num_runs = 15)
         # nv_sig['disable_opt']=True
-        do_resonance(nv_sig, 2.87, 0.2,num_steps=101,num_runs=200)
+        # do_resonance(nv_sig, 2.87, 0.2,num_steps=101,num_runs=200)
         # do_resonance_state(nv_sig , States.LOW)
                 
         # do_rabi(nv_sig,  States.LOW, uwave_time_range=[0, 200],num_runs=5)
