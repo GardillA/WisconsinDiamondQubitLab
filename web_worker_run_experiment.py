@@ -90,8 +90,19 @@ if __name__ == "__main__":
     if not sample_name:
         sample_name = args.experiment_type
     sample_name = safeFileName(sample_name)
-
-    nv_coords = [args.x,args.y,args.z] # V
+    
+    # The user will input XYZ coords in microns, and our python code expects 
+    # them to be in volts. The current piezo stage we have has a conversion of 
+    # 20 um / V, so we need to divide the user input by 20
+    
+    args_x_v = round(args.x / 20, 3)
+    args_y_v = round(args.y / 20, 3)
+    args_z_v = round(args.z / 20, 3)
+    nv_coords = [args_x_v,args_y_v,args_z_v] # V
+    
+    #X = 124.32
+    #Y = 37.88
+    #Z = 73.6
     expected_count_rate = 16   # kcps
     
     

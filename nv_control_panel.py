@@ -362,9 +362,9 @@ if __name__ == '__main__':
         # do_auto_check_location(nv_sig,close_plot=False)
 
         
-        # do_image_sample(nv_sig, scan_size='small')
+        do_image_sample(nv_sig, scan_size='small')
         # do_image_sample(nv_sig,  scan_size='needle')
-        do_image_sample(nv_sig,  scan_size='medium', um_plot = False)
+        # do_image_sample(nv_sig,  scan_size='medium', um_plot = False)
         # do_optimize(nv_sig)
         # do_image_sample(nv_sig,  scan_size='haystack')
         # do_image_sample(nv_sig,  scan_size='big', um_plot = True)
@@ -390,7 +390,7 @@ if __name__ == '__main__':
         #     nv_sig['magnet_angle'] = m
         #     do_resonance(nv_sig, 2.87, 0.25, num_runs = 15)
         # nv_sig['disable_opt']=True
-        # do_resonance(nv_sig, 2.87, 0.2,num_steps=51,num_runs=10)
+        do_resonance(nv_sig, 2.87, 0.2,num_steps=101,num_runs=200)
         # do_resonance_state(nv_sig , States.LOW)
                 
         # do_rabi(nv_sig,  States.LOW, uwave_time_range=[0, 200],num_runs=5)
