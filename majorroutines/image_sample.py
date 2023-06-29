@@ -380,7 +380,6 @@ def main_with_cxn(
             kpl.imshow_update(ax, img_array_kcps, vmin, vmax)
         
     elif xy_control_style == ControlStyle.STREAM:
-        
         pulse_gen.stream_start(total_num_samples)
 
         charge_init = nv_minus_init
@@ -395,10 +394,7 @@ def main_with_cxn(
                 break
 
             # Read the samples
-            if charge_init:
-                new_samples = counter.read_counter_modulo_gates(2)
-            else:
-                new_samples = counter.read_counter_simple()
+            new_samples = counter.read_counter_simple()
 
             # Update the image
             num_new_samples = len(new_samples)

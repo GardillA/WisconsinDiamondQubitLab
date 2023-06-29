@@ -55,6 +55,9 @@ class Digital(IntEnum):
     LOW = 0
     HIGH = 1
 
+class ExpLock(Enum):
+    LOCK = auto()
+    UNLOCK = auto()
 
 Boltzmann = 8.617e-2  # meV / K
 
@@ -142,8 +145,8 @@ def laser_switch_sub(cxn, turn_on, laser_name, laser_power=None):
     # If we're turning things off, turn everything off. If we wanted to really
     # do this nicely we'd find a way to only turn off the specific channel,
     # but it's not worth the effort.
-    if not turn_on:
-        pulse_gen.constant([])
+    # if not turn_on:
+    #     pulse_gen.constant([])
 
 
 def set_laser_power(

@@ -128,6 +128,8 @@ def do_image_sample(nv_sig, scan_size='medium', um_plot = False, close_plot=Fals
                               widqol = widqol)
     return fname
 
+
+
 def do_optimize(nv_sig,set_to_opti_coords=False,save_data=True,plot_data=True,close_plot=False):
 
     opti_coords, opti_count_rate = optimize.main(
@@ -324,9 +326,9 @@ if __name__ == '__main__':
     
         
     nv_sig = {
-        "coords":[5, 5, 3.56], 
+        "coords":[4.889, 4.856, 5.16], 
         "name": "{}-nv1".format(sample_name,),
-        "expected_count_rate":15,
+        "expected_count_rate":None,
         "disable_opt":False,
         "ramp_voltages": False,
         
@@ -341,7 +343,7 @@ if __name__ == '__main__':
         "imaging_readout_dur": 1e7,
         "collection_filter": "630_lp",
         
-        "magnet_angle": 0, 
+        "magnet_angle": 50, 
         "resonance_LOW":2.844 ,"rabi_LOW": 60, "uwave_power_LOW": 14,  # 15.5 max. units is dBm
         "resonance_HIGH": 2.904 , "rabi_HIGH": 60, "uwave_power_HIGH": 14, 
         'norm_style':NormStyle.SINGLE_VALUED}  # 14.5 max. units is dBm
@@ -351,23 +353,23 @@ if __name__ == '__main__':
     # %% Functions to run
     try:
 
+        # reset_xy_drift()
+        # reset_xyz_drift()
+        # positioning.set_xyz (labrad.connect(), [0,5,0])
+        
         # with labrad.connect() as cxn:
-        #     positioning.set_drift(cxn,np.array([0, 0, 0]))
-            # print(positioning.get_drift(cxn))
-        # positioning.set_xyz (labrad.connect(), [5,5,5])
+        #     tool_belt.laser_on(cxn, 'cobolt_515') # turn the laser on
+            # tool_belt.laser_off(cxn, 'cobolt_515') # turn the laser on
         
-        # tool_belt.laser_on_no_cxn('cobolt_515') # turn the laser on
-        # tool_belt.laser_off_no_cxn('cobolt_515') # turn the laser on
-        
-        # do_auto_check_location(nv_sig,close_plot=False)
+        do_auto_check_location(nv_sig,close_plot=False)
 
         
+        # do_optimize(nv_sig)
         # do_image_sample(nv_sig, scan_size='small')
         # do_image_sample(nv_sig,  scan_size='needle')
         # do_image_sample(nv_sig,  scan_size='medium', um_plot = False)
-        # do_optimize(nv_sig)
         # do_image_sample(nv_sig,  scan_size='haystack')
-        # do_image_sample(nv_sig,  scan_size='big', um_plot = True)
+        # do_image_sample(nv_sig,  scan_size='big')
         # do_image_sample(nv_sig,  scan_size='small-ish')
         # do_image_sample(nv_sig,  scan_size='bigger-highres')
         
@@ -390,7 +392,7 @@ if __name__ == '__main__':
         #     nv_sig['magnet_angle'] = m
         #     do_resonance(nv_sig, 2.87, 0.25, num_runs = 15)
         # nv_sig['disable_opt']=True
-        # do_resonance(nv_sig, 2.87, 0.2,num_steps=101,num_runs=200)
+        # do_resonance(nv_sig, 2.87, 0.2,num_steps=51,num_runs=10)
         # do_resonance_state(nv_sig , States.LOW)
                 
         # do_rabi(nv_sig,  States.LOW, uwave_time_range=[0, 200],num_runs=5)

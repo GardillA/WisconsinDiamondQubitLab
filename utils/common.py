@@ -10,6 +10,7 @@ Created September 10th, 2021
 
 import platform
 from pathlib import Path
+from utils.tool_belt import ExpLock 
 ### Lab-specific stuff here
 
 shared_email = "kolkowitznvlab@gmail.com"
@@ -18,7 +19,46 @@ linux_nvdata_dir = Path.home() / "E/nvdata"
 
 ###
 
+def check_exp_lock(cxn, timestamp=None, runtime=None): #potentially pst the runtime and the timestamp?
+    '''
+    When an experiment runs, it will update a variable in the labrad registry.
+    
+    This will check what that entry is, and if it is locked, it will throw an error
+    '''
+    locked_state = ExpLock.LOCK
+    lock_val = get_registry_entry(cxn, 'ExperimentalLock', ("Config", "ExperimentalLock"))
+    
+    if lock_val == locked_state.value:
+        raise Exception('Experiment is currently being used, please try to run again later')
+        
+    return lock_val
 
+def set_exp_lock(cxn):
+    '''
+    When an experiment runs, it will update a variable in the labrad registry.
+    
+    This will set the variable to the "lock" state an not allow other users to run experiments on the same set up
+    '''
+    
+    locked_state = ExpLock.LOCK
+    p = cxn.registry()
+    p.cd("", "Config", "ExperimentalLock")
+    p.set("ExperimentalLock", locked_state.value)
+    # return value
+    
+def set_exp_unlock(cxn):
+    '''
+    When an experiment runs, it will update a variable in the labrad registry.
+    
+    This will set the variable to an unlock state.
+    '''
+    
+    unlocked_state = ExpLock.UNLOCK
+    p = cxn.registry()
+    p.cd("", "Config", "ExperimentalLock")
+    p.set("ExperimentalLock", unlocked_state.value)
+    # return value
+    
 def get_nvdata_dir():
     """Returns an OS-dependent Path to the nvdata directory (configured above)"""
     

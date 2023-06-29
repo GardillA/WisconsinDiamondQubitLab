@@ -103,7 +103,7 @@ if __name__ == "__main__":
     #X = 124.32
     #Y = 37.88
     #Z = 73.6
-    expected_count_rate = 16   # kcps
+    expected_count_rate = 18   # kcps
     
     
     #%%  Prepare nv_sig with nv parameters  (do not alter nv_sig)

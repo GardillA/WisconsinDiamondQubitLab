@@ -65,24 +65,11 @@ def main_with_cxn(
     tool_belt.set_filter(cxn, nv_sig, laser_key)
     readout_power = tool_belt.set_laser_power(cxn, nv_sig, laser_key)
 
-    # Charge init setup and sequence processing
-    if charge_init:
-        if nv_minus_init:
-            laser_key = "nv-_prep_laser"
-        elif nv_zero_init:
-            laser_key = "nv0_prep_laser"
-        tool_belt.set_filter(cxn, nv_sig, laser_key)
-        init = nv_sig["{}_dur".format(laser_key)]
-        init_laser = nv_sig[laser_key]
-        init_power = tool_belt.set_laser_power(cxn, nv_sig, laser_key)
-        seq_args = [init, readout, init_laser, init_power, readout_laser, readout_power]
-        seq_args_string = tool_belt.encode_seq_args(seq_args)
-        seq_name = "charge_init-simple_readout_background_subtraction.py"
-    else:
-        delay = 0
-        seq_args = [delay, readout, readout_laser, readout_power]
-        seq_args_string = tool_belt.encode_seq_args(seq_args)
-        seq_name = "simple_readout.py"
+    # Sequence processing
+    delay = 0
+    seq_args = [delay, readout, readout_laser, readout_power]
+    seq_args_string = tool_belt.encode_seq_args(seq_args)
+    seq_name = "simple_readout.py"
     ret_vals = pulsegen_server.stream_load(seq_name, seq_args_string)
     period = ret_vals[0]
 
@@ -128,11 +115,7 @@ def main_with_cxn(
             break
 
         # Read the samples and update the image
-        if charge_init:
-            new_samples = counter_server.read_counter_modulo_gates(2)
-        else:
-            new_samples = counter_server.read_counter_simple()
-
+        new_samples = counter_server.read_counter_simple()
         # Read the samples and update the image
         num_new_samples = len(new_samples)
         if num_new_samples > 0:

@@ -18,19 +18,20 @@ import numpy as np
 import nv_control_panel as nv
 
 # %%
+
 if __name__ == "__main__":
     
     # %%%%%%%%%%%%%%% NV Parameters %%%%%%%%%%%%%%%
     
-    nv_coords = [6.213, 1.906, 3.48] # V
-    expected_count_rate = None # kcps
-    magnet_angle =  30 # deg
+    nv_coords = [5.085, 4.871, 5] # V
+    expected_count_rate = 19.2 # kps
+    magnet_angle = 54 # deg
     
-    resonance_LOW =  2.79     # GHz
+    resonance_LOW =  2.8527     # GHz
     rabi_LOW = 69.4             # ns   
     uwave_power_LOW = 2    # dBm  15.5 max
     
-    resonance_HIGH = 2.9474     # GHz
+    resonance_HIGH = 2.888     # GHz
     rabi_HIGH = 69.4            # ns 
     uwave_power_HIGH = 14.5     # dBm  14.5 max 
     
@@ -86,7 +87,7 @@ if __name__ == "__main__":
         ####### EXPERIMENT 0: Finding an nv #######
         ### Take confocal image
         ### xy scans can be ['small', 'medium', 'big-ish', 'big', 'huge']
-        # nv.do_image_sample(nv_sig,  scan_size='small')
+        # nv.do_image_sample(nv_sig,  scan_size='small')  
         # nv.do_image_sample(nv_sig, scan_size='medium') 
         # nv.do_image_sample(nv_sig, scan_size='big')
         # nv.do_image_sample(nv_sig,  scan_size='big-ish')
@@ -100,7 +101,7 @@ if __name__ == "__main__":
         ####### EXPERIMENT 1: CW electron spin resonance #######
         ### Measure CW resonance
         # mangles = [0,30,60,90,120,150]
-        # nv.do_resonance(nv_sig, freq_center=2.87, freq_range=0.25, uwave_power=-12.0, num_runs=30, num_steps=75)
+        # nv.do_resonance(nv_sig, freq_center=2.87, freq_range=0.2, uwave_power=-15.0, num_runs=25, num_steps=101)
     
         ####### EXPERIMENT 2: Rabi oscillations #######
         # mpowers = [-10,-8,-6,-4,-2,0,2,4,6,8,10,12,14,15]

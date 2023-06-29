@@ -61,7 +61,7 @@ class SigGenBerkBnc835(LabradServer):
         self.sig_gen = None
         # resource_manager = visa.ResourceManager()
         # self.sig_gen = resource_manager.open_resource(visa_address)
-        # logging.info("init complete")
+        logging.info("init complete")
         
     @setting(30)
     def open_connection(self,c):
