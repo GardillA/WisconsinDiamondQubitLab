@@ -117,6 +117,9 @@ def main(nv_sig, angle_range, num_angle_steps,
     body of the routine.
     """
 
+    tool_belt.check_exp_lock()
+    tool_belt.set_exp_lock()
+    
     with labrad.connect() as cxn:
         main_with_cxn(cxn, nv_sig, angle_range, num_angle_steps,
                       freq_center, freq_range,
@@ -129,6 +132,8 @@ def main_with_cxn(cxn, nv_sig, angle_range, num_angle_steps,
                   uwave_power, uwave_pulse_dur):
 
     # %% Initial set up here
+    
+    tool_belt.reset_cfm(cxn)
 
     angles = numpy.linspace(angle_range[0], angle_range[1], num_angle_steps)
     angle_inds = numpy.linspace(0, num_angle_steps-1, num_angle_steps, dtype=int)
@@ -154,11 +159,11 @@ def main_with_cxn(cxn, nv_sig, angle_range, num_angle_steps,
             _, _, angle_resonances = pesr(cxn, nv_sig_copy,
                                     freq_center, freq_range, num_freq_steps,
                                     num_freq_reps, num_freq_runs,
-                                    uwave_power, uwave_pulse_dur)
+                                    uwave_power, uwave_pulse_dur, stantalone_exp = False)
         else:
             angle_resonances = cwesr(cxn, nv_sig_copy,
                                      freq_center, freq_range, num_freq_steps,
-                                     num_freq_runs, uwave_power)
+                                     num_freq_runs, uwave_power, stantalone_exp = False)
         resonances[ind, :] = angle_resonances
         if all(angle_resonances):
             # We got two resonances so take the difference
@@ -212,6 +217,8 @@ def main_with_cxn(cxn, nv_sig, angle_range, num_angle_steps,
     # Save the data and the figures from this run
     save_data(nv_sig['name'], raw_data, fig)
 
+    tool_belt.reset_cfm(cxn)
+    tool_belt.set_exp_unlock()
 
 # %% Run the file
 

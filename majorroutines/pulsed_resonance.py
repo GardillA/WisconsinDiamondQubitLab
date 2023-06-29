@@ -540,7 +540,8 @@ def main(
     state=States.HIGH,
     composite=False,
     opti_nv_sig=None,
-    close_plot=False
+    close_plot=False,
+    standalone_exp = True
 ):
     """Pulsed electron spin resonance measurement
 
@@ -581,6 +582,10 @@ def main(
         there is one - may be incorrect if there are more than 2 resonances
     """
 
+    if standalone_exp:
+        tool_belt.check_exp_lock()
+        tool_belt.set_exp_lock()
+        
     with labrad.connect() as cxn:
         return main_with_cxn(
             cxn,
@@ -595,7 +600,8 @@ def main(
             state,
             composite,
             opti_nv_sig,
-            close_plot
+            close_plot,
+            standalone_exp
         )
 
 
@@ -612,11 +618,13 @@ def main_with_cxn(
     state=States.HIGH,
     composite=False,
     opti_nv_sig=None,
-    close_plot=False
+    close_plot=False,
+    standalone_exp = True
 ):
 
     ### Setup
-
+    tool_belt.reset_cfm(cxn)
+    
     start_timestamp = tool_belt.get_time_stamp()
     startFunctionTime = time.time()
 
@@ -626,7 +634,6 @@ def main_with_cxn(
     pulse_gen = tool_belt.get_server_pulse_gen(cxn)
     arbwavegen_server = tool_belt.get_server_arb_wave_gen(cxn)
 
-    tool_belt.reset_cfm(cxn)
 
     # check if running external iq_mod with SRS
     iq_key = False
@@ -890,7 +897,6 @@ def main_with_cxn(
 
     ### Clean up, save the data, return
 
-    tool_belt.reset_cfm(cxn)
 
     endFunctionTime = time.time()
 
@@ -944,6 +950,10 @@ def main_with_cxn(
     
     if close_plot:
         plt.close()
+        
+    tool_belt.reset_cfm(cxn)
+    if standalone_exp:
+        tool_belt.set_exp_unlock()
         
     return single_res, data_file_name, [low_freq, high_freq]
 

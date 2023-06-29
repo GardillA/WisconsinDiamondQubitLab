@@ -30,19 +30,23 @@ import csv
 
 
 def main(nv_sig, freq_center, freq_range,
-         num_steps, num_runs, uwave_power, state=States.LOW, opti_nv_sig = None, close_plot=False, widqol = False):
+         num_steps, num_runs, uwave_power, state=States.LOW, opti_nv_sig = None, close_plot=False, widqol = False,
+         standalone_exp = True):
 
+    if standalone_exp:
+        tool_belt.check_exp_lock()
+        tool_belt.set_exp_lock()
+        
     with labrad.connect() as cxn:
         return main_with_cxn(cxn, nv_sig,  freq_center, freq_range,
-                      num_steps, num_runs, uwave_power, state, opti_nv_sig, close_plot, widqol)
+                      num_steps, num_runs, uwave_power, state, opti_nv_sig, close_plot, widqol, standalone_exp)
 
 def main_with_cxn(cxn, nv_sig,  freq_center, freq_range,
-                  num_steps, num_runs, uwave_power, state=States.LOW, opti_nv_sig = None, close_plot=False, widqol = False):
+                  num_steps, num_runs, uwave_power, state=States.LOW, opti_nv_sig = None, close_plot=False, widqol = False, standalone_exp = True):
 
     kpl.init_kplotlib()
     
     # %% Initial calculations and setup
-
     tool_belt.reset_cfm(cxn)
     
     counter_server = tool_belt.get_server_counter(cxn)
@@ -281,7 +285,6 @@ def main_with_cxn(cxn, nv_sig,  freq_center, freq_range,
 
     # %% Clean up and save the data
 
-    tool_belt.reset_cfm(cxn)
 
     endFunctionTime = time.time()
 
@@ -342,7 +345,11 @@ def main_with_cxn(cxn, nv_sig,  freq_center, freq_range,
     
     if close_plot:
         plt.close()
-
+        
+    tool_belt.reset_cfm(cxn)
+    if standalone_exp:
+        tool_belt.set_exp_unlock()
+    
     return  [low_freq, high_freq]
 
 

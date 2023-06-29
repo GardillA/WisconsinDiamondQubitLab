@@ -528,6 +528,9 @@ def main(
     widqol = False
 ):
 
+    tool_belt.check_exp_lock()
+    tool_belt.set_exp_lock()
+    
     with labrad.connect() as cxn:
         angle = main_with_cxn(
             cxn,
@@ -555,12 +558,12 @@ def main_with_cxn(
     widqol = False
 ):
     
+    tool_belt.reset_cfm(cxn)
     kpl.init_kplotlib()
     
     counter_server = tool_belt.get_server_counter(cxn)
     pulsegen_server = tool_belt.get_server_pulse_gen(cxn)
     
-    tool_belt.reset_cfm(cxn)
 
     # %% Sequence setup
 
@@ -848,9 +851,6 @@ def main_with_cxn(
         tool_belt.save_raw_data(raw_data, file_path)
         tool_belt.save_figure(raw_fig, file_path)
 
-    # %% Hardware clean up
-
-    tool_belt.reset_cfm(cxn)
 
     # %% Plot the data
 
@@ -934,6 +934,9 @@ def main_with_cxn(
     if close_plot:
         plt.close()
         
+    tool_belt.reset_cfm(cxn)
+    tool_belt.set_exp_unlock()
+    
     return theta_B_deg
 
 

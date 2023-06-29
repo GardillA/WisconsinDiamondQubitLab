@@ -20,6 +20,10 @@ import majorroutines.optimize as optimize
 def main(nv_sig, run_time, disable_opt=None, nv_minus_init=False, nv_zero_init=False,
         background_subtraction=False,
         background_coords=None,):
+    
+    tool_belt.check_exp_lock()
+    tool_belt.set_exp_lock()
+    
     with labrad.connect() as cxn:
         average, st_dev = main_with_cxn(
             cxn, nv_sig, run_time, disable_opt, nv_minus_init, nv_zero_init,
@@ -37,9 +41,10 @@ def main_with_cxn(
 
     ### Initial setup
 
+    tool_belt.reset_cfm(cxn)
+    
     if disable_opt is not None:
         nv_sig["disable_opt"] = disable_opt
-    tool_belt.reset_cfm(cxn)
     readout = nv_sig["imaging_readout_dur"]
     readout_sec = readout / 10**9
     charge_init = nv_minus_init or nv_zero_init
@@ -161,8 +166,10 @@ def main_with_cxn(
             
 
     ### Clean up and report average and standard deviation
-
+    
     tool_belt.reset_cfm(cxn)
+    tool_belt.set_exp_unlock()
+    
     average = np.mean(samples[0:write_pos]) / (10**3 * readout_sec)
     print(f"Average: {average}")
     st_dev = np.std(samples[0:write_pos]) / (10**3 * readout_sec)

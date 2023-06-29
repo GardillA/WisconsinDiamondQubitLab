@@ -16,8 +16,8 @@ use file 5/5/2022
 # %% Imports
 
 import labrad
-import utils.positioning as positioning
 import utils.tool_belt as tool_belt
+import utils.positioning as positioning
 import utils.common as common
 import majorroutines.image_sample as image_sample
 import majorroutines.optimize as optimize
@@ -38,13 +38,15 @@ import csv
 # %% Major Routines
 
 def do_auto_check_location(nv_sig,close_plot=False, haystack_fname = None):
-    
+    tool_belt.check_exp_lock()
+    tool_belt.set_exp_lock()
+        
     if not haystack_fname:
         with labrad.connect() as cxn:
             haystack_fname = common.get_registry_entry(cxn,"haystack_fname" , ["", "Config", "AutoTracking"])
     
     # collect an image that is smaller than haystack image and has same resolution
-    needle_fname = do_image_sample(nv_sig,scan_size='needle',close_plot=close_plot)
+    needle_fname = do_image_sample(nv_sig,scan_size='needle',close_plot=close_plot, standalone_exp = False)
     
     #run the auto tracker image processing to locate needle image in haystack image
     x_shift, y_shift = auto_tracker.get_shift(nv_sig, haystack_fname, needle_fname,close_plot=close_plot)
@@ -58,7 +60,8 @@ def do_auto_check_location(nv_sig,close_plot=False, haystack_fname = None):
     # With updated drift, optimize on NV to accurately find drift in all three dimensions
     nv_sig_copy = copy.deepcopy(nv_sig)
     nv_sig_copy['expected_count_rate'] = None
-    opti_coords, opti_count_rate = do_optimize(nv_sig_copy,plot_data=False,save_data = False, close_plot=close_plot)
+    opti_coords, opti_count_rate = do_optimize(nv_sig_copy,plot_data=False,save_data = False, close_plot=close_plot,
+                                               standalone_exp = False)
     
     # saving drift as it accumulates
     # folder_dir = 'C:/Users/student/Documents/LAB_DATA/pc_nvcenter-pc/branch_instructional-lab-v2'
@@ -83,9 +86,11 @@ def do_auto_check_location(nv_sig,close_plot=False, haystack_fname = None):
      
     nv_sig['expected_count_rate'] = opti_count_rate
     
+    tool_belt.set_exp_unlock()
     
 
-def do_image_sample(nv_sig, scan_size='medium', um_plot = False, close_plot=False, widqol = False):
+def do_image_sample(nv_sig, scan_size='medium', um_plot = False, close_plot=False, 
+                    widqol = False, standalone_exp = True):
     scan_options=['huge','medium','big-ish','small','small-ish','needle','haystack','big','test','bigger-highres']
     if scan_size not in scan_options:
     #     raise Exception():
@@ -125,12 +130,14 @@ def do_image_sample(nv_sig, scan_size='medium', um_plot = False, close_plot=Fals
     # For now we only support square scans so pass scan_range twice
     fname = image_sample.main(nv_sig, scan_range, scan_range, num_steps,um_plot, 
                               close_plot=close_plot,
-                              widqol = widqol)
+                              widqol = widqol,
+                              standalone_exp = standalone_exp)
     return fname
 
 
 
-def do_optimize(nv_sig,set_to_opti_coords=False,save_data=True,plot_data=True,close_plot=False):
+def do_optimize(nv_sig,set_to_opti_coords=False,save_data=True,plot_data=True,close_plot=False, 
+                standalone_exp = True):
 
     opti_coords, opti_count_rate = optimize.main(
         nv_sig,
@@ -138,6 +145,7 @@ def do_optimize(nv_sig,set_to_opti_coords=False,save_data=True,plot_data=True,cl
         save_data,
         plot_data, 
         close_plot=close_plot,
+        standalone_exp = standalone_exp
     )
     
     return opti_coords, opti_count_rate
@@ -392,7 +400,7 @@ if __name__ == '__main__':
         #     nv_sig['magnet_angle'] = m
         #     do_resonance(nv_sig, 2.87, 0.25, num_runs = 15)
         # nv_sig['disable_opt']=True
-        # do_resonance(nv_sig, 2.87, 0.2,num_steps=51,num_runs=10)
+        # do_resonance(nv_sig, 2.87, 0.2,num_steps=51,num_runs=3)
         # do_resonance_state(nv_sig , States.LOW)
                 
         # do_rabi(nv_sig,  States.LOW, uwave_time_range=[0, 200],num_runs=5)

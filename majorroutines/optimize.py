@@ -493,11 +493,15 @@ def optimize_on_axis(cxn, nv_sig, axis_ind, config, fig=None):
 
 # %% Main
 def main(
-    nv_sig, set_to_opti_coords=True, save_data=False, plot_data=False, set_drift=True, close_plot=False
+    nv_sig, set_to_opti_coords=True, save_data=False, plot_data=False, set_drift=True, close_plot=False, standalone_exp = False
 ):
+    if standalone_exp:
+        tool_belt.check_exp_lock()
+        tool_belt.set_exp_lock()
+        
     with labrad.connect() as cxn:
         return main_with_cxn(
-            cxn, nv_sig, set_to_opti_coords, save_data, plot_data, set_drift, close_plot
+            cxn, nv_sig, set_to_opti_coords, save_data, plot_data, set_drift, close_plot, standalone_exp
         )
 
 
@@ -508,7 +512,8 @@ def main_with_cxn(
     save_data=False,
     plot_data=False,
     set_drift=True,
-    close_plot=False
+    close_plot=False,
+    standalone_exp = False
 ):
     xy_control_style = positioning.get_xy_control_style(cxn)
     z_control_style = positioning.get_z_control_style(cxn)
@@ -742,7 +747,6 @@ def main_with_cxn(
 
     ### Clean up and save the data
 
-    tool_belt.reset_cfm(cxn)
     endFunctionTime = time.time()
     time_elapsed = endFunctionTime - startFunctionTime
 
@@ -782,6 +786,10 @@ def main_with_cxn(
         
         if close_plot:
             plt.close()
+            
+    tool_belt.reset_cfm(cxn)
+    if standalone_exp:
+        tool_belt.set_exp_unlock()
 
     # %% Return the optimized coordinates we found
 

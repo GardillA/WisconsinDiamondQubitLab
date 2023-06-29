@@ -1213,9 +1213,115 @@ def poll_safe_stop():
 
 
 # endregion
+
+# region Experimental Locking
+
+file_lock_name = 'nv_experimental_lock.txt'
+
+
+def check_exp_lock(): #potentially pst the runtime and the timestamp?
+    '''
+    When an experiment runs, it will update a variable in the labrad registry.
+    
+    This will check what that entry is, and if it is locked, it will throw an error
+    '''
+    file_lock_path = common.get_web_worker_dir()
+    file_lock_path_ext = file_lock_path / file_lock_name
+    locked_state = ExpLock.LOCK
+    unlocked_state = ExpLock.UNLOCK
+    
+    try:
+        with file_lock_path_ext.open() as f:
+            dic_lock_read = json.load(f)
+            
+        lock_val = dic_lock_read['ExperimentalLock']
+        timestamp  = dic_lock_read['Timestamp']
+    except Exception:
+        # if the file got deleted, write a new one and assume that the experiment is unlocked
+        timestamp = get_time_stamp()
+        lock_val = unlocked_state.value
+        dic_lock = {'ExperimentalLock': unlocked_state.value,
+                    'Timestamp': timestamp}
+        
+        with open(file_lock_path_ext, "w") as file:
+            json.dump(dic_lock, file)
+            
+    
+    if lock_val == locked_state.value:
+        raise Exception('Experiment is currently being used, please try to run again later.\nCurrent experiment began at {}'.format(timestamp))
+    
+    time.sleep(1)
+    
+    
+    # locked_state = ExpLock.LOCK
+    # lock_val = get_registry_entry(cxn, 'ExperimentalLock', ("Config", "ExperimentalLock"))
+    
+    # if lock_val == locked_state.value:
+    #     raise Exception('Experiment is currently being used, please try to run again later')
+        
+    # return lock_val
+
+def set_exp_lock():
+    '''
+    When an experiment runs, it will update a variable in the labrad registry.
+    
+    This will set the variable to the "lock" state an not allow other users to run experiments on the same set up
+    '''
+    file_lock_path = common.get_web_worker_dir()
+    file_lock_path_ext = file_lock_path /  file_lock_name
+    locked_state = ExpLock.LOCK
+    
+    dic_lock = {'ExperimentalLock': locked_state.value,
+                'Timestamp': get_time_stamp()}
+    
+    with open(file_lock_path_ext, "w") as file:
+        json.dump(dic_lock, file)
+
+    
+    # locked_state = ExpLock.LOCK
+    # p = cxn.registry()
+    # p.cd("", "Config", "ExperimentalLock")
+    # p.set("ExperimentalLock", locked_state.value)
+    # return value
+    
+def set_exp_unlock():
+    '''
+    When an experiment runs, it will update a variable in the labrad registry.
+    
+    This will set the variable to an unlock state.
+    '''
+    file_lock_path = common.get_web_worker_dir()
+    file_lock_path_ext = file_lock_path /  file_lock_name
+    unlocked_state = ExpLock.UNLOCK
+    
+    dic_lock = {'ExperimentalLock': unlocked_state.value,
+                'Timestamp': get_time_stamp()}
+    
+    with open(file_lock_path_ext, "w") as file:
+        json.dump(dic_lock, file)
+    # unlocked_state = ExpLock.UNLOCK
+    # p = cxn.registry()
+    # p.cd("", "Config", "ExperimentalLock")
+    # p.set("ExperimentalLock", unlocked_state.value)
+    # # return value
+    
+# endregion
+
 # region Reset hardware
 
 
+# def set_cfm(cxn=None):
+#     """Reset our cfm so that it's ready to go for a new experiment. Avoids
+#     unnecessarily resetting components that may suffer hysteresis (ie the
+#     components that control xyz since these need to be reset in any
+#     routine where they matter anyway).
+#     """
+#     if cxn is None:
+#         with labrad.connect() as cxn:
+#             set_cfm_with_cxn(cxn)
+#     else:
+#         set_cfm_with_cxn(cxn)
+        
 def reset_cfm(cxn=None):
     """Reset our cfm so that it's ready to go for a new experiment. Avoids
     unnecessarily resetting components that may suffer hysteresis (ie the
@@ -1228,8 +1334,25 @@ def reset_cfm(cxn=None):
     else:
         reset_cfm_with_cxn(cxn)
 
+# def set_cfm_with_cxn(cxn):
+#     # check to see if the experiment is currenbtly being used. If it is, it should raise an error
+#     common.check_exp_lock(cxn)
+#     time.sleep(1)
+#     # then lock the experiment
+#     common.set_exp_lock(cxn)
+#     cxn_server_names = cxn.servers
+#     for name in cxn_server_names:
+#         server = cxn[name]
+#         # Check for servers that ask not to be reset automatically
+#         if hasattr(server, "reset_cfm_opt_out"):
+#             continue
+#         if hasattr(server, "reset"):
+#             server.reset()
+
 
 def reset_cfm_with_cxn(cxn):
+    # after the measurement has finished, unlock the experiment
+    # common.set_exp_unlock(cxn)
     cxn_server_names = cxn.servers
     for name in cxn_server_names:
         server = cxn[name]

@@ -88,8 +88,12 @@ def main(
     vmax=None,
     scan_type='XY',
     close_plot=False,
-    widqol = False
+    widqol = False,
+    standalone_exp = True
 ):
+    if standalone_exp:
+        tool_belt.check_exp_lock()
+        tool_belt.set_exp_lock()
 
     with labrad.connect() as cxn:
         fname = main_with_cxn(
@@ -104,7 +108,8 @@ def main(
             vmax,
             scan_type,
             close_plot,
-            widqol
+            widqol,
+            standalone_exp
         )
 
     return fname
@@ -123,13 +128,14 @@ def main_with_cxn(
     scan_type='XY',
     close_plot=False,
     widqol = False,
+    standalone_exp = True
 ):
     
     ### Some initial setup
+    tool_belt.reset_cfm(cxn)
     
     xy_control_style = positioning.get_xy_control_style(cxn)
     
-    tool_belt.reset_cfm(cxn)
     x_center, y_center, z_center = positioning.set_xyz_on_nv(cxn, nv_sig,drift_adjust=False)
 
     optimize.prepare_microscope(cxn, nv_sig)
@@ -411,7 +417,6 @@ def main_with_cxn(
     
     ### Clean up and save the data
 
-    tool_belt.reset_cfm(cxn)
     if scan_type == 'XY':
         xy_server.write_xy(adj_x_center, adj_y_center)
     elif scan_type == 'XZ':
@@ -457,6 +462,10 @@ def main_with_cxn(
     if close_plot:
         plt.close()
     
+    tool_belt.reset_cfm(cxn)
+    if standalone_exp:
+        tool_belt.set_exp_unlock()
+        
     return filename
     
     # return img_array, x_positions_1d, y_positions_1d

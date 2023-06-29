@@ -244,6 +244,8 @@ def main(
     do_fft = True,
     widqol = False
 ):
+    tool_belt.check_exp_lock()
+    tool_belt.set_exp_lock()
 
     with labrad.connect() as cxn:
         angle = main_with_cxn(
@@ -280,12 +282,13 @@ def main_with_cxn(
     widqol =False
 ):
 
+    tool_belt.reset_cfm(cxn)
+    
     counter_server = tool_belt.get_server_counter(cxn)
     pulsegen_server = tool_belt.get_server_pulse_gen(cxn)
     # arbwavegen_server = tool_belt.get_server_arb_wave_gen(cxn)
 
 
-    tool_belt.reset_cfm(cxn)
     kpl.init_kplotlib()
 
     # %% Sequence setup
@@ -583,9 +586,6 @@ def main_with_cxn(
 
     # %% Hardware clean up
 
-    tool_belt.reset_cfm(cxn)
-
-
     ### Process and plot the data
 
     ret_vals = tool_belt.process_counts(sig_counts, ref_counts, num_reps, spin_readout_dur, norm_style)
@@ -671,6 +671,9 @@ def main_with_cxn(
     if close_plot:
         plt.close()
 
+    tool_belt.reset_cfm(cxn)
+    tool_belt.set_exp_unlock()
+    
     return
 
 

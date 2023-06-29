@@ -227,7 +227,9 @@ def main(nv_sig, uwave_time_range, state,
          num_steps, num_reps, num_runs,
          opti_nv_sig = None,
          return_popt=False,close_plot=False, widqol = False):
-
+    
+    tool_belt.check_exp_lock()
+    tool_belt.set_exp_lock()
     with labrad.connect() as cxn:
         rabi_per, sig_counts, ref_counts, popt = main_with_cxn(cxn, nv_sig,
                                          uwave_time_range, state,
@@ -244,11 +246,12 @@ def main_with_cxn(cxn, nv_sig,  uwave_time_range, state,
                   num_steps, num_reps, num_runs,
                   opti_nv_sig = None, close_plot=False, widqol = False):
 
+    tool_belt.reset_cfm(cxn)
+    
     counter_server = tool_belt.get_server_counter(cxn)
     pulsegen_server = tool_belt.get_server_pulse_gen(cxn)
     # arbwavegen_server = tool_belt.get_server_arb_wave_gen(cxn)
 
-    tool_belt.reset_cfm(cxn)
     kpl.init_kplotlib()
 
     # %% Get the starting time of the function, to be used to calculate run time
@@ -491,8 +494,6 @@ def main_with_cxn(cxn, nv_sig,  uwave_time_range, state,
 
     # %% Clean up and save the data
 
-    tool_belt.reset_cfm(cxn)
-
     endFunctionTime = time.time()
 
     timeElapsed = endFunctionTime - startFunctionTime
@@ -537,6 +538,9 @@ def main_with_cxn(cxn, nv_sig,  uwave_time_range, state,
     if close_plot:
         plt.close()
 
+    tool_belt.reset_cfm(cxn)
+    tool_belt.set_exp_unlock()
+    
     if fit_success:
         return rabi_period, sig_counts, ref_counts, popt
     else:
