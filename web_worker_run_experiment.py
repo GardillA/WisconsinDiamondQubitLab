@@ -100,9 +100,6 @@ if __name__ == "__main__":
     args_z_v = round(args.z / 20, 3)
     nv_coords = [args_x_v,args_y_v,args_z_v] # V
     
-    #X = 124.32
-    #Y = 37.88
-    #Z = 73.6
     expected_count_rate = 18   # kcps
     
     
@@ -135,6 +132,8 @@ if __name__ == "__main__":
     
     # %% %%%%%%%%%%%%%%% Experimental section %%%%%%%%%%%%%%%
     
+    tool_belt.check_exp_lock()
+    
     try:
 
         ####### Useful global functions #######
@@ -144,6 +143,7 @@ if __name__ == "__main__":
         # tool_belt.set_drift([0.0, 0.0, 0.0]) 
         
         # Perform optimize, if counts are below a certain value, run autotracker to try to find the NV.
+  
         _, opti_count_rate = nv.do_optimize(nv_sig,save_data = False, close_plot=True)
         if opti_count_rate < 8:
             nv.do_auto_check_location(nv_sig,close_plot=True)
@@ -218,10 +218,12 @@ if __name__ == "__main__":
     
     except Exception as exc:
         print("Code crashed. Press enter to see error")
+        tool_belt.set_exp_unlock()
         raise exc
     
     finally:
         # Reset our hardware - this should be done in each routine, but
         # let's double check here
         tool_belt.reset_cfm()
+        tool_belt.set_exp_unlock()
         tool_belt.reset_safe_stop()

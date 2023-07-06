@@ -684,7 +684,7 @@ if __name__ == "__main__":
     
     kpl.init_kplotlib()
     
-    file = '2023_01_19-11_14_34-E6test-nv1'
+    file = '2023_01_31-16_05_52-E6-nv1'
 
     data = tool_belt.get_raw_data(file)
     detuning= data['detuning']

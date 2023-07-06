@@ -74,6 +74,8 @@ def get_expected_run_time_string(cxn,exp_name,seq_period,num_steps,num_reps,num_
     )  # s
         
     expected_run_time_m = expected_run_time_s / 60  # to minutes
+    
+    update_exp_lock('expected_run_time_m', expected_run_time_m)
 
     return " \nExpected experiment time: {:.2f} minutes. ".format(expected_run_time_m)
 
@@ -1221,7 +1223,7 @@ file_lock_name = 'nv_experimental_lock.txt'
 
 def check_exp_lock(): #potentially pst the runtime and the timestamp?
     '''
-    When an experiment runs, it will update a variable in the labrad registry.
+    When an experiment runs, it will update a variable in a json file.
     
     This will check what that entry is, and if it is locked, it will throw an error
     '''
@@ -1236,6 +1238,7 @@ def check_exp_lock(): #potentially pst the runtime and the timestamp?
             
         lock_val = dic_lock_read['ExperimentalLock']
         timestamp  = dic_lock_read['Timestamp']
+        expected_run_time_m  = dic_lock_read['expected_run_time_m']
     except Exception:
         # if the file got deleted, write a new one and assume that the experiment is unlocked
         timestamp = get_time_stamp()
@@ -1248,7 +1251,7 @@ def check_exp_lock(): #potentially pst the runtime and the timestamp?
             
     
     if lock_val == locked_state.value:
-        raise Exception('Experiment is currently being used, please try to run again later.\nCurrent experiment began at {}'.format(timestamp))
+        raise Exception('Experiment is currently being used, please try to run again later.\nCurrent experiment began at {}\nExpected runtime for current experiment: {:.2f} min'.format(timestamp, expected_run_time_m))
     
     time.sleep(1)
     
@@ -1261,9 +1264,34 @@ def check_exp_lock(): #potentially pst the runtime and the timestamp?
         
     # return lock_val
 
+
+def update_exp_lock(entry, value):
+    '''
+    When an experiment runs, it will update a variable in a json file.
+    
+    This will update the dictionary entry with the 
+    '''
+    file_lock_path = common.get_web_worker_dir()
+    file_lock_path_ext = file_lock_path /  file_lock_name
+    # locked_state = ExpLock.LOCK
+    
+    with file_lock_path_ext.open() as f:
+        dic_lock_read = json.load(f)
+    dic_lock_read[str(entry)] = value
+    
+    with open(file_lock_path_ext, "w") as file:
+        json.dump(dic_lock_read, file)
+
+    
+    # locked_state = ExpLock.LOCK
+    # p = cxn.registry()
+    # p.cd("", "Config", "ExperimentalLock")
+    # p.set("ExperimentalLock", locked_state.value)
+    # return value
+    
 def set_exp_lock():
     '''
-    When an experiment runs, it will update a variable in the labrad registry.
+    When an experiment runs, it will update a variable in a json file.
     
     This will set the variable to the "lock" state an not allow other users to run experiments on the same set up
     '''
@@ -1286,7 +1314,7 @@ def set_exp_lock():
     
 def set_exp_unlock():
     '''
-    When an experiment runs, it will update a variable in the labrad registry.
+    When an experiment runs, it will update a variable in a json file.
     
     This will set the variable to an unlock state.
     '''
@@ -1299,6 +1327,7 @@ def set_exp_unlock():
     
     with open(file_lock_path_ext, "w") as file:
         json.dump(dic_lock, file)
+        
     # unlocked_state = ExpLock.UNLOCK
     # p = cxn.registry()
     # p.cd("", "Config", "ExperimentalLock")

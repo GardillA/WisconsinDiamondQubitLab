@@ -110,15 +110,16 @@ def create_fit_figure(uwave_time_range, num_steps, uwave_freq, norm_avg_sig,
     # return offset + (np.exp(-t / abs(decay)) * abs(amp) * np.cos((two_pi * freq * t)))
 
     uni_nu = "\u03BD"
-    eq_text = r"$(1 - A) + A \cos ( 2 \pi \nu \tau ) e^{-\tau / d}$"
+    uni_r_sub = "\u1D63"
+    eq_text = r"$(1 - A) + A \cos ( 2 \pi \tau / T_{r} ) e^{-\tau / d}$"
     freq_text = "Set Frequency {} GHz".format(uwave_freq)
     size = kpl.Size.SMALL
     if decay > 2*max_uwave_time:
-        base_text = "A = {:.3f} \n1/{} = {:.1f} ns \nd >> {:.0f} ns"
-        text = base_text.format(Amp,uni_nu, 1/popt[1], max_uwave_time)
+        base_text = "A = {:.3f} \nT{} = {:.1f} ns \nd >> {:.0f} ns"
+        text = base_text.format(Amp, uni_r_sub, 1/popt[1], max_uwave_time)
     else:
-        base_text = "A = {:.3f} \n1/{} = {:.1f} ns \nd = {:.1f} us"
-        text = base_text.format(Amp,uni_nu, 1/popt[1], decay/1e3)
+        base_text = "A = {:.3f} \nT{} = {:.1f} ns \nd = {:.1f} us"
+        text = base_text.format(Amp,uni_r_sub,1/popt[1], decay/1e3)
     kpl.anchored_text(ax, text, kpl.Loc.LOWER_LEFT, size=size)
     kpl.anchored_text(ax, freq_text, kpl.Loc.LOWER_RIGHT, size=size)
     kpl.anchored_text(ax, eq_text, kpl.Loc.UPPER_RIGHT, size=size)
@@ -325,6 +326,7 @@ def main_with_cxn(cxn, nv_sig,  uwave_time_range, state,
     print(tool_belt.get_expected_run_time_string(cxn,'rabi',
                                          period,num_steps,num_reps,num_runs))
     print('')
+    # return
     # %% Collect the data
 
     # Start 'Press enter to stop...'
@@ -587,6 +589,6 @@ def replot(file):
 if __name__ == '__main__':
     
 
-    file = '2023_06_01-12_07_43-E6-nv1'
+    file = '2023_04_18-15_39_32-E6-nv1'
     
     replot(file)

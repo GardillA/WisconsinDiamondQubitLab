@@ -334,9 +334,9 @@ if __name__ == '__main__':
     
         
     nv_sig = {
-        "coords":[4.889, 4.856, 5.16], 
+        "coords":[4.858, 4.757, 5.26],  
         "name": "{}-nv1".format(sample_name,),
-        "expected_count_rate":None,
+        "expected_count_rate":16,
         "disable_opt":False,
         "ramp_voltages": False,
         
@@ -359,6 +359,8 @@ if __name__ == '__main__':
     nv_sig = nv_sig
 
     # %% Functions to run
+    tool_belt.check_exp_lock()
+    
     try:
 
         # reset_xy_drift()
@@ -369,11 +371,11 @@ if __name__ == '__main__':
         #     tool_belt.laser_on(cxn, 'cobolt_515') # turn the laser on
             # tool_belt.laser_off(cxn, 'cobolt_515') # turn the laser on
         
-        do_auto_check_location(nv_sig,close_plot=False)
+        # do_auto_check_location(nv_sig,close_plot=False)
 
         
         # do_optimize(nv_sig)
-        # do_image_sample(nv_sig, scan_size='small')
+        do_image_sample(nv_sig, scan_size='small')
         # do_image_sample(nv_sig,  scan_size='needle')
         # do_image_sample(nv_sig,  scan_size='medium', um_plot = False)
         # do_image_sample(nv_sig,  scan_size='haystack')
@@ -403,12 +405,12 @@ if __name__ == '__main__':
         # do_resonance(nv_sig, 2.87, 0.2,num_steps=51,num_runs=3)
         # do_resonance_state(nv_sig , States.LOW)
                 
-        # do_rabi(nv_sig,  States.LOW, uwave_time_range=[0, 200],num_runs=5)
+        # do_rabi(nv_sig,  States.LOW, uwave_time_range=[0, 200],num_steps = 75, num_runs=15)
         # do_rabi(nv_sig,  States.HIGH, uwave_time_range=[0, 250],num_runs=30)
         
         # detunings=[-3]
         # for d in detunings:
-            # do_ramsey(nv_sig, set_detuning=d,num_runs=50, precession_time_range = [0, 1.75 * 10 ** 3],num_steps = 71)  
+        #     do_ramsey(nv_sig, set_detuning=d,num_runs=25, precession_time_range = [0, 1.75 * 10 ** 3],num_steps = 75)  
        
         # do_spin_echo(nv_sig,echo_time_range = [0, 110 * 10 ** 3], num_steps=71, num_runs=50) 
         pass
@@ -416,4 +418,5 @@ if __name__ == '__main__':
 
         # Make sure everything is reset
         tool_belt.reset_cfm()
+        tool_belt.set_exp_unlock()
         tool_belt.reset_safe_stop()
