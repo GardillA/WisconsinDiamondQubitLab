@@ -1239,20 +1239,27 @@ def check_exp_lock(): #potentially pst the runtime and the timestamp?
         lock_val = dic_lock_read['ExperimentalLock']
         timestamp  = dic_lock_read['Timestamp']
         expected_run_time_m  = dic_lock_read['expected_run_time_m']
+        
     except Exception:
         # if the file got deleted, write a new one and assume that the experiment is unlocked
         timestamp = get_time_stamp()
         lock_val = unlocked_state.value
+        expected_run_time_m = None
         dic_lock = {'ExperimentalLock': unlocked_state.value,
-                    'Timestamp': timestamp}
+                    'Timestamp': timestamp,
+                    'expected_run_time_m': expected_run_time_m}
         
         with open(file_lock_path_ext, "w") as file:
             json.dump(dic_lock, file)
             
-    
+    # check if the experiment is locked
     if lock_val == locked_state.value:
-        raise Exception('Experiment is currently being used, please try to run again later.\nCurrent experiment began at {}\nExpected runtime for current experiment: {:.2f} min'.format(timestamp, expected_run_time_m))
-    
+        if expected_run_time_m:
+            raise Exception('Experiment is currently being used, please try to run again later.\nCurrent experiment began at {}\nExpected runtime for current experiment: {:.1f} minutes'.format(timestamp, expected_run_time_m))
+        else:
+            raise Exception('Experiment is currently being used, please try to run again later.\nCurrent experiment began at {}'.format(timestamp))
+       
+            
     time.sleep(1)
     
     
@@ -1300,7 +1307,8 @@ def set_exp_lock():
     locked_state = ExpLock.LOCK
     
     dic_lock = {'ExperimentalLock': locked_state.value,
-                'Timestamp': get_time_stamp()}
+                'Timestamp': get_time_stamp(),
+                'expected_run_time_m': None}
     
     with open(file_lock_path_ext, "w") as file:
         json.dump(dic_lock, file)
@@ -1323,7 +1331,8 @@ def set_exp_unlock():
     unlocked_state = ExpLock.UNLOCK
     
     dic_lock = {'ExperimentalLock': unlocked_state.value,
-                'Timestamp': get_time_stamp()}
+                'Timestamp': get_time_stamp(),
+                'expected_run_time_m': None}
     
     with open(file_lock_path_ext, "w") as file:
         json.dump(dic_lock, file)

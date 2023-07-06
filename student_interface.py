@@ -8,7 +8,6 @@ This will be the interface where students can run all the microscope commands/ex
 It will run nv_control_panel.py with the inputted parameters
 
 """
-import labrad
 import utils.positioning as positioning
 import utils.tool_belt as tool_belt
 import utils.common as common
