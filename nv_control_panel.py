@@ -37,19 +37,43 @@ import csv
 
 # %% Major Routines
 
-def do_auto_check_location(nv_sig,close_plot=False, haystack_fname = None):
+def do_auto_check_location(nv_sig=None,close_plot=False, haystack_fname = None):
     tool_belt.check_exp_lock()
     tool_belt.set_exp_lock()
-        
-    if not haystack_fname:
-        with labrad.connect() as cxn:
-            haystack_fname = common.get_registry_entry(cxn,"haystack_fname" , ["", "Config", "AutoTracking"])
+    
+    # set up a temperorary nv_sig
+    green_power =10
+    sample_name = "WiDQ"
+    green_laser = "cobolt_515"
+    nv_sig_basic =  {
+        "coords":[5, 5, 5],  
+        "name": "{}-autotracking".format(sample_name,),
+        "expected_count_rate":None,        
+        "imaging_laser":green_laser,
+        "imaging_laser_power": green_power,
+        "imaging_readout_dur": 1e7,
+        "collection_filter": "630_lp",
+        "magnet_angle": 0, 
+        'norm_style':NormStyle.SINGLE_VALUED}  # 14.5 max. units is dBm
+
+    # get the info of the haystack file and nv coord that we use for autotracking
+    with labrad.connect() as cxn:
+        haystack_fname = common.get_registry_entry(cxn,"haystack_fname" , ["", "Config", "AutoTracking"])
+        haystack_coord_x_um = common.get_registry_entry(cxn,"haystack_nv_coord_x" , ["", "Config", "AutoTracking"])
+        haystack_coord_y_um = common.get_registry_entry(cxn,"haystack_nv_coord_y" , ["", "Config", "AutoTracking"])
+        haystack_coord_z_um = common.get_registry_entry(cxn,"haystack_nv_coord_z" , ["", "Config", "AutoTracking"])
+    
+    # The NV coords saved in the registry are in um, so convert back to V
+    haystack_coord_x = haystack_coord_x_um/20
+    haystack_coord_y = haystack_coord_y_um/20
+    haystack_coord_z = haystack_coord_z_um/20
+    nv_sig_basic['coords'] = [haystack_coord_x, haystack_coord_y, haystack_coord_z]
     
     # collect an image that is smaller than haystack image and has same resolution
-    needle_fname = do_image_sample(nv_sig,scan_size='needle',close_plot=close_plot, standalone_exp = False)
+    needle_fname = do_image_sample(nv_sig_basic,scan_size='needle',close_plot=close_plot, standalone_exp = False)
     
     #run the auto tracker image processing to locate needle image in haystack image
-    x_shift, y_shift = auto_tracker.get_shift(nv_sig, haystack_fname, needle_fname,close_plot=close_plot)
+    x_shift, y_shift = auto_tracker.get_shift(nv_sig_basic, haystack_fname, needle_fname,close_plot=close_plot)
     
     # add the shift of the two images to the current drift
     with labrad.connect() as cxn:
@@ -58,26 +82,10 @@ def do_auto_check_location(nv_sig,close_plot=False, haystack_fname = None):
         positioning.set_drift(cxn, new_drift)
         
     # With updated drift, optimize on NV to accurately find drift in all three dimensions
-    nv_sig_copy = copy.deepcopy(nv_sig)
+    nv_sig_copy = copy.deepcopy(nv_sig_basic)
     nv_sig_copy['expected_count_rate'] = None
     opti_coords, opti_count_rate = do_optimize(nv_sig_copy,plot_data=False,save_data = False, close_plot=close_plot,
-                                               standalone_exp = False)
-    
-    # saving drift as it accumulates
-    # folder_dir = 'C:/Users/student/Documents/LAB_DATA/pc_nvcenter-pc/branch_instructional-lab-v2'
-    # file =  '2023_06-drift_tracking.csv'
-    # with open(folder_dir + '/' + file, 'a', newline='') as f:
-    #     # create the csv writer
-    #     writer = csv.writer(f)
-        
-    #     timestamp = tool_belt.get_time_stamp()
-    #     current_time = time.time()
-    
-    #     with labrad.connect() as cxn:
-    #         final_drift = positioning.get_drift(cxn)
-    #     header = [final_drift[0], final_drift[1], final_drift[2], opti_count_rate, timestamp, current_time]
-    #     writer.writerow(header)
-        
+                                               standalone_exp = False)      
         
     if opti_count_rate > 8:
         return
@@ -87,6 +95,30 @@ def do_auto_check_location(nv_sig,close_plot=False, haystack_fname = None):
     nv_sig['expected_count_rate'] = opti_count_rate
     
     tool_belt.set_exp_unlock()
+    
+def do_update_haystack_file(nv_sig):
+    ''' This function takes an image wit hthe "haystack" setting, and will
+    update the filename for the current haystack file that is used for autotracking.
+    
+    It is suggested that you perform this centered on an NV, right after optimizing on it.
+    '''
+    
+    haystack_fname = do_image_sample(nv_sig, 'haystack')
+    coords = nv_sig['coords']
+    coords_um = [coords[0]*20, coords[1]*20, coords[2]*20]
+    
+    with labrad.connect() as cxn:
+        p = cxn.registry()
+        p.cd("", "Config", "AutoTracking")
+        p.set("haystack_fname", haystack_fname)
+        p.set("haystack_nv_coord_x", coords_um[0])
+        p.set("haystack_nv_coord_y", coords_um[1])
+        p.set("haystack_nv_coord_z", coords_um[2])
+        
+    admin_webpage = 'https://pub.physics.wisc.edu/qubit/admin/?s=edit_station&name=NV-Center+Station+1'
+    print('\n***HAYSTACK FILE UPDATED***\nCenter coords of haystack image (in um): [{:.2f}, {:.2f}, {:.2f}]\nUpdate um coords at {}'.format(coords_um[0],
+                                                                                         coords_um[1], coords_um[2], admin_webpage))
+    
     
 
 def do_image_sample(nv_sig, scan_size='medium', um_plot = False, close_plot=False, 
@@ -274,7 +306,8 @@ def do_ramsey(nv_sig,  precession_time_range = [0, 0.2 * 10 ** 4], num_steps = 1
 
 
 def do_spin_echo(nv_sig, echo_time_range = [0, 80 * 10 ** 3],num_steps = 81,
-                 num_reps = 1e4, num_runs=40, state = States.LOW,close_plot=False, widqol = False):
+                 num_reps = 1e4, num_runs=40, state = States.LOW,close_plot=False, 
+                 calc_theta_B = False, widqol = False):
 
     # T2* in nanodiamond NVs is just a couple us at 300 K
     # In bulk it's more like 100 us at 300 K
@@ -292,6 +325,7 @@ def do_spin_echo(nv_sig, echo_time_range = [0, 80 * 10 ** 3],num_steps = 81,
         num_runs,
         state,
         close_plot=close_plot,
+        calc_theta_B = calc_theta_B,
         widqol = widqol
     )
     return angle
@@ -329,14 +363,14 @@ if __name__ == '__main__':
     
 
     green_power =10
-    sample_name = "WiQD"
+    sample_name = "WiDQ"
     green_laser = "cobolt_515"
     
         
     nv_sig = {
-        "coords":[4.858, 4.757, 5.26],  
+        "coords":[4.832, 4.807, 5.09],  
         "name": "{}-nv1".format(sample_name,),
-        "expected_count_rate":16,
+        "expected_count_rate":None,
         "disable_opt":False,
         "ramp_voltages": False,
         
@@ -351,9 +385,9 @@ if __name__ == '__main__':
         "imaging_readout_dur": 1e7,
         "collection_filter": "630_lp",
         
-        "magnet_angle": 50, 
-        "resonance_LOW":2.844 ,"rabi_LOW": 60, "uwave_power_LOW": 14,  # 15.5 max. units is dBm
-        "resonance_HIGH": 2.904 , "rabi_HIGH": 60, "uwave_power_HIGH": 14, 
+        "magnet_angle": 0, 
+        "resonance_LOW":2.833 ,"rabi_LOW": 87.9, "uwave_power_LOW": 14,  # 15.5 max. units is dBm
+        "resonance_HIGH": 2.904, "rabi_HIGH": 60, "uwave_power_HIGH": 14, 
         'norm_style':NormStyle.SINGLE_VALUED}  # 14.5 max. units is dBm
     
     nv_sig = nv_sig
@@ -365,17 +399,18 @@ if __name__ == '__main__':
 
         # reset_xy_drift()
         # reset_xyz_drift()
-        # positioning.set_xyz (labrad.connect(), [0,5,0])
+        # positioning.set_xyz (labrad.connect(), [5,5,5])
         
         # with labrad.connect() as cxn:
         #     tool_belt.laser_on(cxn, 'cobolt_515') # turn the laser on
             # tool_belt.laser_off(cxn, 'cobolt_515') # turn the laser on
         
-        # do_auto_check_location(nv_sig,close_plot=False)
+        do_auto_check_location(nv_sig,close_plot=False)
+        do_update_haystack_file(nv_sig)
 
         
         # do_optimize(nv_sig)
-        do_image_sample(nv_sig, scan_size='small')
+        # do_image_sample(nv_sig, scan_size='small')
         # do_image_sample(nv_sig,  scan_size='needle')
         # do_image_sample(nv_sig,  scan_size='medium', um_plot = False)
         # do_image_sample(nv_sig,  scan_size='haystack')
@@ -402,17 +437,15 @@ if __name__ == '__main__':
         #     nv_sig['magnet_angle'] = m
         #     do_resonance(nv_sig, 2.87, 0.25, num_runs = 15)
         # nv_sig['disable_opt']=True
-        # do_resonance(nv_sig, 2.87, 0.2,num_steps=51,num_runs=3)
+        # do_resonance(nv_sig, 2.87, 0.2,num_steps=51,num_runs=5)
         # do_resonance_state(nv_sig , States.LOW)
                 
-        # do_rabi(nv_sig,  States.LOW, uwave_time_range=[0, 200],num_steps = 75, num_runs=15)
+        do_rabi(nv_sig,  States.LOW, uwave_time_range=[0, 200],num_steps = 51, num_runs=5)
         # do_rabi(nv_sig,  States.HIGH, uwave_time_range=[0, 250],num_runs=30)
         
-        # detunings=[-3]
-        # for d in detunings:
-        #     do_ramsey(nv_sig, set_detuning=d,num_runs=25, precession_time_range = [0, 1.75 * 10 ** 3],num_steps = 75)  
+        # do_ramsey(nv_sig, set_detuning=0,num_runs=25, precession_time_range = [0, 1.75 * 10 ** 3],num_steps = 75)  
        
-        # do_spin_echo(nv_sig,echo_time_range = [0, 110 * 10 ** 3], num_steps=71, num_runs=50) 
+        # do_spin_echo(nv_sig,echo_time_range = [0, 110 * 10 ** 3], num_steps=71, num_runs=50, calc_theta_B = True) 
         pass
     finally:
 

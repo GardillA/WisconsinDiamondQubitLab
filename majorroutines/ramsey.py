@@ -687,7 +687,7 @@ if __name__ == "__main__":
     file = '2023_01_31-16_05_52-E6-nv1'
 
     data = tool_belt.get_raw_data(file)
-    detuning= data['detuning']
+    detuning = data['detuning']
     nv_sig = data['nv_sig']
     sig_counts = data['sig_counts']
     ref_counts = data['ref_counts']

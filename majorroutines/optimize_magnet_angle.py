@@ -159,11 +159,11 @@ def main_with_cxn(cxn, nv_sig, angle_range, num_angle_steps,
             _, _, angle_resonances = pesr(cxn, nv_sig_copy,
                                     freq_center, freq_range, num_freq_steps,
                                     num_freq_reps, num_freq_runs,
-                                    uwave_power, uwave_pulse_dur, stantalone_exp = False)
+                                    uwave_power, uwave_pulse_dur, standalone_exp = False)
         else:
             angle_resonances = cwesr(cxn, nv_sig_copy,
                                      freq_center, freq_range, num_freq_steps,
-                                     num_freq_runs, uwave_power, stantalone_exp = False)
+                                     num_freq_runs, uwave_power, standalone_exp = False)
         resonances[ind, :] = angle_resonances
         if all(angle_resonances):
             # We got two resonances so take the difference
@@ -228,7 +228,7 @@ def main_with_cxn(cxn, nv_sig, angle_range, num_angle_steps,
 # the script that you set up here.
 if __name__ == '__main__':
 
-    file = '2022_06_22-18_24_34-johnson-nv1'
+    file = '2023_07_07-12_22_46-WiQD-nv1'
     data = tool_belt.get_raw_data(file)
     splittings = data['splittings']
     print(splittings)

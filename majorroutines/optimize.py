@@ -571,7 +571,7 @@ def main_with_cxn(
     ### Try to optimize.
 
     if xy_control_style == ControlStyle.STREAM:
-        num_attempts = 20
+        num_attempts = 5
     elif xy_control_style == ControlStyle.STEP:
         num_attempts = 4
     # print(xy_control_style)

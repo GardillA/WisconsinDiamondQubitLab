@@ -23,17 +23,17 @@ if __name__ == "__main__":
     
     # %%%%%%%%%%%%%%% NV Parameters %%%%%%%%%%%%%%%
     
-    nv_coords = [4.858, 4.757, 5.26]#5.645, 5.053, 5] # V
+    nv_coords = [4.853, 4.799, 5.08] # V
     expected_count_rate = None
     # kps
-    magnet_angle = 93 # deg
+    magnet_angle = 85 # deg
     
-    resonance_LOW =  2.8527     # GHz
-    rabi_LOW = 69.4             # ns   
+    resonance_LOW =  2.841     # GHz
+    rabi_LOW = 105.7             # ns   
     uwave_power_LOW = 2    # dBm  15.5 max
     
-    resonance_HIGH = 2.888     # GHz
-    rabi_HIGH = 69.4            # ns 
+    resonance_HIGH = 2.900     # GHz
+    rabi_HIGH = 94.1            # ns 
     uwave_power_HIGH = 14.5     # dBm  14.5 max 
     
     #%%  Prepare nv_sig with nv parameters  (do not alter nv_sig)
@@ -81,6 +81,10 @@ if __name__ == "__main__":
         # nv_sig['disable_opt']=True
         # nv.do_stationary_count(nv_sig)
         
+        ### Autotracking functions
+        # nv.do_auto_check_location(nv_sig)
+        nv.do_update_haystack_file(nv_sig)
+        
         ### Turn laser on or off 
         # tool_belt.laser_on_no_cxn('cobolt_515') # turn the laser on
         # tool_belt.laser_off_no_cxn('cobolt_515') # turn the laser on
@@ -89,7 +93,7 @@ if __name__ == "__main__":
         ### Take confocal image
         ### xy scans can be ['small', 'medium', 'big-ish', 'big', 'huge']
         # nv.do_image_sample(nv_sig,  scan_size='small')  
-           nv.do_image_sample(nv_sig, scan_size='medium') 
+        # nv.do_image_sample(nv_sig, scan_size='medium') 
         # nv.do_image_sample(nv_sig, scan_size='big')
         # nv.do_image_sample(nv_sig,  scan_size='big-ish')
         # nv.do_image_sample(nv_sig, scan_size='huge')
@@ -102,14 +106,14 @@ if __name__ == "__main__":
         ####### EXPERIMENT 1: CW electron spin resonance #######
         ### Measure CW resonance
         # mangles = [0,30,60,90,120,150]
-        # nv.do_resonance(nv_sig, freq_center=2.87, freq_range=0.2, uwave_power=-15.0, num_runs=50, num_steps=101)
+        # nv.do_resonance(nv_sig, freq_center=2.87, freq_range=0.2, uwave_power=-15.0, num_runs=25, num_steps=101)
     
         ####### EXPERIMENT 2: Rabi oscillations #######
         # mpowers = [-10,-8,-6,-4,-2,0,2,4,6,8,10,12,14,15]
         # for i in mpowers:
         #     nv_sig["uwave_power_LOW"]=i
-        # nv.do_rabi(nv_sig,  States.LOW , uwave_time_range=[0, 200], num_runs=20, num_steps=51, num_reps=2e4)
-        # nv.do_rabi(nv_sig,  States.HIGH, uwave_time_range=[0, 200], num_runs=20, num_steps=51, num_reps=2e4)
+        # nv.do_rabi(nv_sig,  States.LOW , uwave_time_range=[0, 500], num_runs=15, num_steps=51, num_reps=1e4)
+         # nv.do_rabi(nv_sig,  States.HIGH, uwave_time_range=[0, 500], num_runs=20, num_steps=51, num_reps=2e4)
         
         
         ####### EXPERIMENT 3: Ramsey experiment #######

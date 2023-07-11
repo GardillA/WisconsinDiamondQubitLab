@@ -92,155 +92,157 @@ def create_raw_data_figure(
     
     return fig, ax_sig_ref, ax_norm
 
+# %% Functionality to calculate the expected magnetic field from the 13C revivals, 
+#    and compare to what we expect based on the splitting
 
-# def calc_single_hamiltonian(theta_B, center_freq, mag_B):
-#     # Get parallel and perpendicular components of B field in
-#     # units of frequency
-#     par_B = gmuB * mag_B * numpy.cos(theta_B)
-#     perp_B = gmuB * mag_B * numpy.sin(theta_B)
-#     hamiltonian = numpy.array(
-#         [
-#             [center_freq + par_B, inv_sqrt_2 * perp_B, 0],
-#             [inv_sqrt_2 * perp_B, 0, inv_sqrt_2 * perp_B],
-#             [0, inv_sqrt_2 * perp_B, center_freq - par_B],
-#         ]
-#     )
-#     return hamiltonian
-
-
-# def calc_hamiltonian(theta_B, center_freq, mag_B):
-#     fit_vec = [center_freq, mag_B]
-#     if (type(theta_B) is list) or (type(theta_B) is numpy.ndarray):
-#         hamiltonian_list = [
-#             calc_single_hamiltonian(val, *fit_vec) for val in theta_B
-#         ]
-#         return hamiltonian_list
-#     else:
-#         return calc_single_hamiltonian(theta_B, *fit_vec)
+def calc_single_hamiltonian(theta_B, center_freq, mag_B):
+    # Get parallel and perpendicular components of B field in
+    # units of frequency
+    par_B = gmuB * mag_B * numpy.cos(theta_B)
+    perp_B = gmuB * mag_B * numpy.sin(theta_B)
+    hamiltonian = numpy.array(
+        [
+            [center_freq + par_B, inv_sqrt_2 * perp_B, 0],
+            [inv_sqrt_2 * perp_B, 0, inv_sqrt_2 * perp_B],
+            [0, inv_sqrt_2 * perp_B, center_freq - par_B],
+        ]
+    )
+    return hamiltonian
 
 
-# def calc_res_pair(theta_B, center_freq, mag_B):
-#     hamiltonian = calc_hamiltonian(theta_B, center_freq, mag_B)
-#     if (type(theta_B) is list) or (type(theta_B) is numpy.ndarray):
-#         vals = numpy.sort(eigvals(hamiltonian), axis=1)
-#         resonance_low = numpy.real(vals[:, 1] - vals[:, 0])
-#         resonance_high = numpy.real(vals[:, 2] - vals[:, 0])
-#     else:
-#         vals = numpy.sort(eigvals(hamiltonian))
-#         resonance_low = numpy.real(vals[1] - vals[0])
-#         resonance_high = numpy.real(vals[2] - vals[0])
-#     return resonance_low, resonance_high
+def calc_hamiltonian(theta_B, center_freq, mag_B):
+    fit_vec = [center_freq, mag_B]
+    if (type(theta_B) is list) or (type(theta_B) is numpy.ndarray):
+        hamiltonian_list = [
+            calc_single_hamiltonian(val, *fit_vec) for val in theta_B
+        ]
+        return hamiltonian_list
+    else:
+        return calc_single_hamiltonian(theta_B, *fit_vec)
 
 
-# def zfs_cost_func(center_freq, mag_B, theta_B, meas_res_low, meas_res_high):
-#     calc_res_low, calc_res_high = calc_res_pair(theta_B, center_freq, mag_B)
-#     diff_low = calc_res_low - meas_res_low
-#     diff_high = calc_res_high - meas_res_high
-#     return numpy.sqrt(diff_low ** 2 + diff_high ** 2)
+def calc_res_pair(theta_B, center_freq, mag_B):
+    hamiltonian = calc_hamiltonian(theta_B, center_freq, mag_B)
+    if (type(theta_B) is list) or (type(theta_B) is numpy.ndarray):
+        vals = numpy.sort(eigvals(hamiltonian), axis=1)
+        resonance_low = numpy.real(vals[:, 1] - vals[:, 0])
+        resonance_high = numpy.real(vals[:, 2] - vals[:, 0])
+    else:
+        vals = numpy.sort(eigvals(hamiltonian))
+        resonance_low = numpy.real(vals[1] - vals[0])
+        resonance_high = numpy.real(vals[2] - vals[0])
+    return resonance_low, resonance_high
 
 
-# def theta_B_cost_func(
-#     theta_B, center_freq, mag_B, meas_res_low, meas_res_high
-# ):
-#     calc_res_low, calc_res_high = calc_res_pair(theta_B, center_freq, mag_B)
-#     diff_low = calc_res_low - meas_res_low
-#     diff_high = calc_res_high - meas_res_high
-#     return numpy.sqrt(diff_low ** 2 + diff_high ** 2)
+def zfs_cost_func(center_freq, mag_B, theta_B, meas_res_low, meas_res_high):
+    calc_res_low, calc_res_high = calc_res_pair(theta_B, center_freq, mag_B)
+    diff_low = calc_res_low - meas_res_low
+    diff_high = calc_res_high - meas_res_high
+    return numpy.sqrt(diff_low ** 2 + diff_high ** 2)
 
 
-# def plot_resonances_vs_theta_B(data, center_freq=None,revival_time_guess=None,num_revivals_guess=None):
+def theta_B_cost_func(
+    theta_B, center_freq, mag_B, meas_res_low, meas_res_high
+):
+    calc_res_low, calc_res_high = calc_res_pair(theta_B, center_freq, mag_B)
+    diff_low = calc_res_low - meas_res_low
+    diff_high = calc_res_high - meas_res_high
+    return numpy.sqrt(diff_low ** 2 + diff_high ** 2)
 
-#     # %% Setup
 
-#     fit_func, popt, stes, fit_fig = fit_data(data,revival_time_guess,num_revivals_guess)
-#     # print(popt)
-#     if (fit_func is None) or (popt is None):
-#         print("Fit failed!")
-#         return
+def plot_resonances_vs_theta_B(data, center_freq=None,revival_time_guess=None,num_revivals_guess=None):
 
-#     nv_sig = data["nv_sig"]
-#     resonance_LOW = nv_sig["resonance_LOW"]
-#     resonance_HIGH = nv_sig["resonance_HIGH"]
-#     # resonance_LOW = 2.7979
-#     # resonance_HIGH = 2.9456
-#     # print('test',popt)
+    # %% Setup
 
-#     revival_time = popt[1]
-#     revival_time_ste = stes[1]
-#     mag_B, mag_B_ste = mag_B_from_revival_time(revival_time, revival_time_ste)
+    fit_func, popt, stes, fit_fig = fit_data(data,revival_time_guess,num_revivals_guess)
+    # print(popt)
+    if (fit_func is None) or (popt is None):
+        print("Fit failed!")
+        return
 
-#     # %% Angle matching
+    nv_sig = data["nv_sig"]
+    resonance_LOW = nv_sig["resonance_LOW"]
+    resonance_HIGH = nv_sig["resonance_HIGH"]
+    # resonance_LOW = 2.7979
+    # resonance_HIGH = 2.9456
+    # print('test',popt)
 
-#     # Find the angle that minimizes the distances of the predicted resonances
-#     # from the measured resonances
-#     theta_B = None
-#     if center_freq is None:
-#         center_freq = (resonance_LOW + resonance_HIGH) / 2
-#         # print(center_freq)
-#         # center_freq = 2.8718356422016003
-#         # print(center_freq)
-#     args = (center_freq, mag_B, resonance_LOW, resonance_HIGH)
-#     result = minimize_scalar(
-#         theta_B_cost_func, bounds=(0, pi / 2), args=args, method="bounded"
-#     )
-#     if result.success:
-#         theta_B = result.x
-#         theta_B_deg = theta_B * 180 / pi
-#         print(
-#             "theta_B = {:.4f} radians, {:.3f} degrees".format(
-#                 theta_B, theta_B_deg
-#             )
-#         )
-#         print("cost = {:.3e}".format(result.fun))
-#     else:
-#         print("minimize_scalar failed to find theta_B")
+    revival_time = popt[1]
+    revival_time_ste = stes[1]
+    mag_B, mag_B_ste = mag_B_from_revival_time(revival_time, revival_time_ste)
 
-#     # %% Plotting
+    # %% Angle matching
 
-#     num_steps = 1000
-#     linspace_theta_B = numpy.linspace(0, pi / 2, num_steps)
+    # Find the angle that minimizes the distances of the predicted resonances
+    # from the measured resonances
+    theta_B = None
+    if center_freq is None:
+        center_freq = (resonance_LOW + resonance_HIGH) / 2
+        # print(center_freq)
+        # center_freq = 2.8718356422016003
+        # print(center_freq)
+    args = (center_freq, mag_B, resonance_LOW, resonance_HIGH)
+    result = minimize_scalar(
+        theta_B_cost_func, bounds=(0, pi / 2), args=args, method="bounded"
+    )
+    if result.success:
+        theta_B = result.x
+        theta_B_deg = theta_B * 180 / pi
+        print(
+            "theta_B = {:.4f} radians, {:.3f} degrees".format(
+                theta_B, theta_B_deg
+            )
+        )
+        print("cost = {:.3e}".format(result.fun))
+    else:
+        print("minimize_scalar failed to find theta_B")
 
-#     fig, ax = plt.subplots(figsize=(8.5, 8.5))
-#     fig.set_tight_layout(True)
-#     res_pairs = calc_res_pair(linspace_theta_B, center_freq, mag_B)
-#     # res_pairs_high = calc_res_pair(linspace_theta_B, center_freq, mag_B+mag_B_ste)
-#     # res_pairs_low = calc_res_pair(linspace_theta_B, center_freq, mag_B-mag_B_ste)
-#     linspace_theta_B_deg = linspace_theta_B * (180 / pi)
-#     ax.plot(linspace_theta_B_deg, res_pairs[0], label="Calculated low")
-#     # ax.fill_between(linspace_theta_B_deg, res_pairs_high[0], res_pairs_low[0],
-#     #                 alpha=0.5)
-#     ax.plot(linspace_theta_B_deg, res_pairs[1], label="Calculated high")
-#     # ax.fill_between(linspace_theta_B_deg, res_pairs_high[1], res_pairs_low[1],
-#     #                 alpha=0.5)
+    # %% Plotting
 
-#     const = [resonance_LOW for el in range(0, num_steps)]
-#     ax.plot(linspace_theta_B_deg, const, label="Measured low")
-#     const = [resonance_HIGH for el in range(0, num_steps)]
-#     ax.plot(linspace_theta_B_deg, const, label="Measured high")
+    num_steps = 1000
+    linspace_theta_B = numpy.linspace(0, pi / 2, num_steps)
+
+    fig, ax = plt.subplots(figsize=(8.5, 8.5))
+    fig.set_tight_layout(True)
+    res_pairs = calc_res_pair(linspace_theta_B, center_freq, mag_B)
+    # res_pairs_high = calc_res_pair(linspace_theta_B, center_freq, mag_B+mag_B_ste)
+    # res_pairs_low = calc_res_pair(linspace_theta_B, center_freq, mag_B-mag_B_ste)
+    linspace_theta_B_deg = linspace_theta_B * (180 / pi)
+    ax.plot(linspace_theta_B_deg, res_pairs[0], label="Calculated low")
+    # ax.fill_between(linspace_theta_B_deg, res_pairs_high[0], res_pairs_low[0],
+    #                 alpha=0.5)
+    ax.plot(linspace_theta_B_deg, res_pairs[1], label="Calculated high")
+    # ax.fill_between(linspace_theta_B_deg, res_pairs_high[1], res_pairs_low[1],
+    #                 alpha=0.5)
+
+    const = [resonance_LOW for el in range(0, num_steps)]
+    ax.plot(linspace_theta_B_deg, const, label="Measured low")
+    const = [resonance_HIGH for el in range(0, num_steps)]
+    ax.plot(linspace_theta_B_deg, const, label="Measured high")
     
 
-#     if theta_B is not None:
-#         text = r"$\theta_{B} = $%.3f" % (theta_B_deg)
-#         props = dict(boxstyle="round", facecolor="wheat", alpha=0.5)
-#         ax.text(
-#             0.05,
-#             0.65,
-#             text,
-#             fontsize=14,
-#             transform=ax.transAxes,
-#             verticalalignment="top",
-#             bbox=props,
-#         )
+    if theta_B is not None:
+        text = r"$\theta_{B} = $%.3f" % (theta_B_deg)
+        props = dict(boxstyle="round", facecolor="wheat", alpha=0.5)
+        ax.text(
+            0.05,
+            0.65,
+            text,
+            fontsize=14,
+            transform=ax.transAxes,
+            verticalalignment="top",
+            bbox=props,
+        )
 
-#     ax.set_xlabel(r"$\theta_{B}$ (deg)")
-#     ax.set_ylabel("Resonances (GHz)")
-#     ax.legend()
+    ax.set_xlabel(r"$\theta_{B}$ (deg)")
+    ax.set_ylabel("Resonances (GHz)")
+    ax.legend()
 
-#     fig.canvas.draw()
-#     fig.set_tight_layout(True)
-#     fig.canvas.flush_events()
+    fig.canvas.draw()
+    fig.set_tight_layout(True)
+    fig.canvas.flush_events()
 
-#     return fit_func, popt, stes, fit_fig, theta_B_deg, fig
+    return fit_func, popt, stes, fit_fig, theta_B_deg, fig
 
 
 # %% Functions
@@ -525,6 +527,7 @@ def main(
     num_runs,
     state=States.LOW,
     close_plot=False,
+    calc_theta_B = False,
     widqol = False
 ):
 
@@ -541,6 +544,7 @@ def main(
             num_runs,
             state,
             close_plot,
+            calc_theta_B,
             widqol
         )
         return angle
@@ -555,6 +559,7 @@ def main_with_cxn(
     num_runs,
     state=States.LOW,
     close_plot=False,
+    calc_theta_B = False,
     widqol = False
 ):
     
@@ -918,15 +923,18 @@ def main_with_cxn(
     # %% Fit and save figs
     try:
         ret_vals = fit_data(raw_data, revival_time_guess=60 * 1000)
-        # ret_vals = plot_resonances_vs_theta_B(raw_data)
         fit_func, popt, stes, fit_fig = ret_vals
         theta_B_deg = None
-        # fit_func, popt, stes, fit_fig, theta_B_deg, angle_fig = ret_vals
+        
+        if calc_theta_B:
+            ret_vals = plot_resonances_vs_theta_B(raw_data)
+            fit_func, popt, stes, fit_fig, theta_B_deg, angle_fig = ret_vals
 
         file_path_fit = tool_belt.get_file_path(__file__, timestamp, nv_name + "-fit")
         tool_belt.save_figure(fit_fig, file_path_fit)
-        # file_path_angle = tool_belt.get_file_path(__file__, timestamp, nv_name + "-angle")
-        # tool_belt.save_figure(angle_fig, file_path_angle)
+        if calc_theta_B:
+            file_path_angle = tool_belt.get_file_path(__file__, timestamp, nv_name + "-angle")
+            tool_belt.save_figure(angle_fig, file_path_angle)
     except Exception:
         print("Fit Failed")
         theta_B_deg = None
