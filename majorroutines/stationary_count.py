@@ -13,6 +13,7 @@ import utils.positioning as positioning
 import utils.kplotlib as kpl
 import numpy as np
 import matplotlib.pyplot as plt
+import copy
 import labrad
 import majorroutines.optimize as optimize
 
@@ -48,7 +49,9 @@ def main_with_cxn(
     readout = nv_sig["imaging_readout_dur"]
     readout_sec = readout / 10**9
     charge_init = nv_minus_init or nv_zero_init
-    optimize.main_with_cxn(cxn, nv_sig)  # Is there something wrong with this line? Let me (Matt) know and let's fix it
+    opti_nv_sig = copy.deepcopy(nv_sig)
+    opti_nv_sig['disable_opt'] = True
+    optimize.main_with_cxn(cxn, opti_nv_sig)  # Is there something wrong with this line? Let me (Matt) know and let's fix it
     pulsegen_server = tool_belt.get_server_pulse_gen(cxn)
     counter_server = tool_belt.get_server_counter(cxn)
     

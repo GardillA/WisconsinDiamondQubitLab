@@ -92,11 +92,24 @@ def get_mod_type(laser_name):
     return mod_type.name
 
 
-def laser_off(cxn, laser_name):
+def laser_off(laser_name):
+    with labrad.connect() as cxn:
+        laser_switch_sub(cxn, False, laser_name)
+
+
+def laser_on( laser_name, laser_power=None):
+    
+    init_safe_stop()
+    
+    while not safe_stop():
+        with labrad.connect() as cxn:
+            laser_switch_sub(cxn, True, laser_name, laser_power)
+    
+def laser_off_cxn(cxn, laser_name):
     laser_switch_sub(cxn, False, laser_name)
 
 
-def laser_on(cxn, laser_name, laser_power=None):
+def laser_on_cxn(cxn, laser_name, laser_power=None):
     laser_switch_sub(cxn, True, laser_name, laser_power)
 
 

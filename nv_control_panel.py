@@ -48,20 +48,21 @@ def do_auto_check_location(nv_sig=None,close_plot=False, haystack_fname = None):
     nv_sig_basic =  {
         "coords":[5, 5, 5],  
         "name": "{}-autotracking".format(sample_name,),
-        "expected_count_rate":None,        
+        "expected_count_rate":None,  
+        'disable_opt':False,
         "imaging_laser":green_laser,
         "imaging_laser_power": green_power,
         "imaging_readout_dur": 1e7,
         "collection_filter": "630_lp",
         "magnet_angle": 0, 
-        'norm_style':NormStyle.SINGLE_VALUED}  # 14.5 max. units is dBm
+        'norm_style':NormStyle.SINGLE_VALUED}
 
     # get the info of the haystack file and nv coord that we use for autotracking
     with labrad.connect() as cxn:
         haystack_fname = common.get_registry_entry(cxn,"haystack_fname" , ["", "Config", "AutoTracking"])
-        haystack_coord_x_um = common.get_registry_entry(cxn,"haystack_nv_coord_x" , ["", "Config", "AutoTracking"])
-        haystack_coord_y_um = common.get_registry_entry(cxn,"haystack_nv_coord_y" , ["", "Config", "AutoTracking"])
-        haystack_coord_z_um = common.get_registry_entry(cxn,"haystack_nv_coord_z" , ["", "Config", "AutoTracking"])
+        haystack_coord_x_um = common.get_registry_entry(cxn,"haystack_nv_coord_x_um" , ["", "Config", "AutoTracking"])
+        haystack_coord_y_um = common.get_registry_entry(cxn,"haystack_nv_coord_y_um" , ["", "Config", "AutoTracking"])
+        haystack_coord_z_um = common.get_registry_entry(cxn,"haystack_nv_coord_z_um" , ["", "Config", "AutoTracking"])
     
     # The NV coords saved in the registry are in um, so convert back to V
     haystack_coord_x = haystack_coord_x_um/20
@@ -111,9 +112,9 @@ def do_update_haystack_file(nv_sig):
         p = cxn.registry()
         p.cd("", "Config", "AutoTracking")
         p.set("haystack_fname", haystack_fname)
-        p.set("haystack_nv_coord_x", coords_um[0])
-        p.set("haystack_nv_coord_y", coords_um[1])
-        p.set("haystack_nv_coord_z", coords_um[2])
+        p.set("haystack_nv_coord_x_um", coords_um[0])
+        p.set("haystack_nv_coord_y_um", coords_um[1])
+        p.set("haystack_nv_coord_z_um", coords_um[2])
         
     admin_webpage = 'https://pub.physics.wisc.edu/qubit/admin/?s=edit_station&name=NV-Center+Station+1'
     print('\n***HAYSTACK FILE UPDATED***\nCenter coords of haystack image (in um): [{:.2f}, {:.2f}, {:.2f}]\nUpdate um coords at {}'.format(coords_um[0],
@@ -236,7 +237,7 @@ def do_optimize_magnet_angle(nv_sig):
     freq_center = 2.87
     freq_range= 0.2
     num_freq_steps = 75
-    num_freq_runs = 5
+    num_freq_runs = 6
     
     # Pulsed
     # uwave_power = 14
@@ -368,9 +369,9 @@ if __name__ == '__main__':
     
         
     nv_sig = {
-        "coords":[4.832, 4.807, 5.09],  
+        "coords":[4.63, 6.098, 5.0],  
         "name": "{}-nv1".format(sample_name,),
-        "expected_count_rate":None,
+        "expected_count_rate":20,
         "disable_opt":False,
         "ramp_voltages": False,
         
@@ -385,9 +386,9 @@ if __name__ == '__main__':
         "imaging_readout_dur": 1e7,
         "collection_filter": "630_lp",
         
-        "magnet_angle": 0, 
-        "resonance_LOW":2.833 ,"rabi_LOW": 87.9, "uwave_power_LOW": 14,  # 15.5 max. units is dBm
-        "resonance_HIGH": 2.904, "rabi_HIGH": 60, "uwave_power_HIGH": 14, 
+        "magnet_angle": 120, 
+        "resonance_LOW":2.833 ,"rabi_LOW": 100, "uwave_power_LOW": 14,  # 15.5 max. units is dBm
+        "resonance_HIGH": 2.890, "rabi_HIGH": 100, "uwave_power_HIGH": 14, 
         'norm_style':NormStyle.SINGLE_VALUED}  # 14.5 max. units is dBm
     
     nv_sig = nv_sig
@@ -405,8 +406,8 @@ if __name__ == '__main__':
         #     tool_belt.laser_on(cxn, 'cobolt_515') # turn the laser on
             # tool_belt.laser_off(cxn, 'cobolt_515') # turn the laser on
         
-        do_auto_check_location(nv_sig,close_plot=False)
-        do_update_haystack_file(nv_sig)
+        # do_auto_check_location(nv_sig,close_plot=False)
+        # do_update_haystack_file(nv_sig)
 
         
         # do_optimize(nv_sig)
@@ -431,7 +432,7 @@ if __name__ == '__main__':
         # do_stationary_count(nv_sig, )
         
         # do_optimize_magnet_angle(nv_sig)
-        # do_pulsed_resonance(nv_sig, freq_center=2.87, freq_range=0.2,num_runs=5)
+        do_pulsed_resonance(nv_sig, freq_center=2.87, freq_range=0.2,num_runs=5)
         # mangles = [0,30,60,90,120,150]
         # for m in mangles:
         #     nv_sig['magnet_angle'] = m
@@ -440,8 +441,8 @@ if __name__ == '__main__':
         # do_resonance(nv_sig, 2.87, 0.2,num_steps=51,num_runs=5)
         # do_resonance_state(nv_sig , States.LOW)
                 
-        do_rabi(nv_sig,  States.LOW, uwave_time_range=[0, 200],num_steps = 51, num_runs=5)
-        # do_rabi(nv_sig,  States.HIGH, uwave_time_range=[0, 250],num_runs=30)
+        # do_rabi(nv_sig,  States.LOW, uwave_time_range=[0, 200],num_steps = 51, num_runs=5)
+        # do_rabi(nv_sig,  States.HIGH, uwave_time_range=[0, 200],num_steps = 51,num_runs=10)
         
         # do_ramsey(nv_sig, set_detuning=0,num_runs=25, precession_time_range = [0, 1.75 * 10 ** 3],num_steps = 75)  
        
