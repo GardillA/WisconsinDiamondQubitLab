@@ -127,7 +127,6 @@ def main_with_cxn(
         # Read the samples and update the image
         num_new_samples = len(new_samples)
         if num_new_samples > 0:
-
             # If we did charge init, subtract out the non-initialized count rate
             if charge_init:
                 new_samples = [max(int(el[0]) - int(el[1]), 0) for el in new_samples]

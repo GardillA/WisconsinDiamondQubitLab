@@ -396,7 +396,7 @@ if __name__ == "__main__":
     green_laser = "cobolt_515"
         
     nv_sig = {
-        "coords":[6.54, 5.614,4.25],
+        "coords":[4.916, 5.922, 5.0],
         "name": "{}-nv1".format(sample_name,),
         "disable_opt":False,
         "ramp_voltages": False,
@@ -412,7 +412,7 @@ if __name__ == "__main__":
         "imaging_readout_dur": 1e7,
         "collection_filter": "630_lp",
         
-        "expected_count_rate":22,
+        "expected_count_rate":18,
         # "expected_count_rate":None,
         "magnet_angle": 50, 
         "resonance_LOW":2.7641 ,"rabi_LOW": 75.2, "uwave_power_LOW": 15.5,  # 15.5 max. units is dBm
@@ -422,9 +422,9 @@ if __name__ == "__main__":
     nv_sig = nv_sig
 
 
-    num_reps = int(2e6)
+    num_reps = int(2e5)
     delay_range = [0, 600]
-    num_steps = 50
+    num_steps = 51
     # bnc 835
     
     state = States.HIGH

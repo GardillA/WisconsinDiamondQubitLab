@@ -23,7 +23,7 @@ if __name__ == "__main__":
     
     # %%%%%%%%%%%%%%% NV Parameters %%%%%%%%%%%%%%%
     
-    nv_coords = [4.63, 6.098, 5.0]# V  #
+    nv_coords = [4.959, 5.267, 4.88]# V  #
     # expected_count_rate = None
     expected_count_rate = None#17.3
     # kps
@@ -84,7 +84,7 @@ if __name__ == "__main__":
         
         ### Autotracking functions
         # nv.do_auto_check_location(nv_sig)
-        # nv.do_update_haystack_file(nv_sig)
+        nv.do_update_haystack_file(nv_sig)
         
         ### Turn laser on 
         # tool_belt.laser_on('cobolt_515') # turn the laser
@@ -107,7 +107,7 @@ if __name__ == "__main__":
         ####### EXPERIMENT 1: CW electron spin resonance #######
         ### Measure CW resonance
         # mangles = [0,30,60,90,120,150]
-        nv.do_resonance(nv_sig, freq_center=2.87, freq_range=0.2, uwave_power=-5.0, num_runs=15, num_steps=61)
+        # nv.do_resonance(nv_sig, freq_center=2.87, freq_range=0.2, uwave_power=-5.0, num_runs=15, num_steps=61)
     
         ####### EXPERIMENT 2: Rabi oscillations #######
         # mpowers = [-10,-8,-6,-4,-2,0,2,4,6,8,10,12,14,15]

@@ -177,6 +177,7 @@ def main_with_cxn(cxn, nv_sig,  freq_center, freq_range,
 
             new_counts = counter_server.read_counter_separate_gates(2) #originally 1
             sample_counts = new_counts[0]
+            # print(sample_counts)
             ref_gate_counts = sample_counts[0::2]
             ref_counts[run_ind, freq_ind]  = sum(ref_gate_counts)
 
