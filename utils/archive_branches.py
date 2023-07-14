@@ -142,7 +142,7 @@ if __name__ == "__main__":
 
     # List of branches to archive
     branches_to_archive = [
-        "working_branch_sam",
+        "instructional-lab",
     ]
 
     skip_merged_check = True
