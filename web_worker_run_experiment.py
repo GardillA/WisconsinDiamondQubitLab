@@ -74,6 +74,7 @@ if __name__ == "__main__":
     parser.add_argument('--x',action='store',type=float,required=True)
     parser.add_argument('--y',action='store',type=float,required=True)
     parser.add_argument('--z',action='store',type=float,required=True)
+    parser.add_argument('--set-detuning', action='store',type=float) 
     parser.add_argument('--set-magnet_angle', action='store',type=float)  
     parser.add_argument('--set-uwave-power', action='store',type=float) 
     parser.add_argument('--set-uwave-frequency', action='store',type=float)  
@@ -151,9 +152,9 @@ if __name__ == "__main__":
         elif args.experiment_type in routines_mw:
             
             # Perform optimize, if counts are below a certain value, run autotracker to try to find the NV.
-            _, opti_count_rate = nv.do_optimize(nv_sig,save_data = False, close_plot=True)
-            if opti_count_rate < 8:
-                nv.do_auto_check_location(close_plot=True)
+            # _, opti_count_rate = nv.do_optimize(nv_sig,save_data = False, close_plot=True)
+            # if opti_count_rate < 8:
+            #     nv.do_auto_check_location(close_plot=True)
             
             # for the experiments that use MWs, make a copy of the nv_sig and put in the arguments
             nv_sig_run = copy.deepcopy(nv_sig)
@@ -194,8 +195,12 @@ if __name__ == "__main__":
                            num_steps=args.num_test_points, num_runs=args.num_test_averages, close_plot=True, widqol = True)
             
             elif args.experiment_type == "ramsey":
-                nv.do_ramsey(nv_sig_run, state=state_input, set_detuning=0, precession_time_range=[0,1000*args.test_precession_time_max], 
-                             num_steps=args.num_test_points, num_runs=args.num_test_averages, close_plot=True, do_fft = False, widqol = True)
+                detuning = args.set_detuning
+                nv.do_ramsey(nv_sig_run,precession_time_range=[0,1000*args.test_precession_time_max], 
+                             set_detuning=detuning,  num_steps=args.num_test_points,
+                             num_runs=args.num_test_averages, 
+                             state=state_input,  
+                             close_plot=True, do_fft = False, widqol = True)
             
             elif args.experiment_type == "spin-echo":
                 # users will input the total precession time, and our code expects

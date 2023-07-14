@@ -237,7 +237,7 @@ def do_optimize_magnet_angle(nv_sig):
     freq_center = 2.87
     freq_range= 0.2
     num_freq_steps = 75
-    num_freq_runs = 6
+    num_freq_runs = 5
     
     # Pulsed
     # uwave_power = 14
@@ -369,9 +369,9 @@ if __name__ == '__main__':
     
         
     nv_sig = {
-        "coords":[4.966, 5.246, 4.87],  
+        "coords":[5.391, 5.078, 4.09],  
         "name": "{}-nv1".format(sample_name,),
-        "expected_count_rate":15,
+        "expected_count_rate":18,
         "disable_opt":False,
         "ramp_voltages": False,
         
@@ -431,14 +431,14 @@ if __name__ == '__main__':
         # nv_sig['disable_opt']=True
         # do_stationary_count(nv_sig, )
         
-        # do_optimize_magnet_angle(nv_sig)
+        do_optimize_magnet_angle(nv_sig)
         # do_pulsed_resonance(nv_sig, freq_center=2.87, freq_range=0.2,num_runs=15)
         # mangles = [0,30,60,90,120,150]
         # for m in mangles:
         #     nv_sig['magnet_angle'] = m
         #     do_resonance(nv_sig, 2.87, 0.25, num_runs = 15)
         # nv_sig['disable_opt']=True
-        # do_resonance(nv_sig, 2.87, 0.2,num_steps=51,num_runs=10, uwave_power=-5.0)
+        # do_resonance(nv_sig, 2.87, 0.2,num_steps=51,num_runs=5, uwave_power=-5.0)
         # do_resonance_state(nv_sig , States.LOW)
                 
         # do_rabi(nv_sig,  States.LOW, uwave_time_range=[0, 200],num_steps = 51, num_runs=3)
@@ -446,7 +446,7 @@ if __name__ == '__main__':
         
         # do_ramsey(nv_sig, set_detuning=0,num_runs=25, precession_time_range = [0, 1.75 * 10 ** 3],num_steps = 75)  
        
-        do_spin_echo(nv_sig,echo_time_range = [0, 8 * 10 ** 3], num_steps=81, num_runs=50, calc_theta_B = False) 
+        # do_spin_echo(nv_sig,echo_time_range = [0, 8 * 10 ** 3], num_steps=81, num_runs=50, calc_theta_B = False) 
         pass
     finally:
 

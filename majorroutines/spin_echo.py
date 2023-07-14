@@ -675,7 +675,7 @@ def main_with_cxn(
     print('')
     print(tool_belt.get_expected_run_time_string(cxn,'spin_echo',seq_time,num_steps/2,num_reps,num_runs))
     print('')
-    return
+    # return
     
     # %% Get the starting time of the function, to be used to calculate run time
 

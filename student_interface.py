@@ -23,7 +23,7 @@ if __name__ == "__main__":
     
     # %%%%%%%%%%%%%%% NV Parameters %%%%%%%%%%%%%%%
     
-    nv_coords = [4.513, 4.715, 4.88]# V  #
+    nv_coords = [5.35, 5.131, 4.87]# V  #
     # expected_count_rate = None
     expected_count_rate = None#17.3
     # kps
@@ -84,7 +84,7 @@ if __name__ == "__main__":
         
         ### Autotracking functions
         # nv.do_auto_check_location(nv_sig)
-        nv.do_update_haystack_file(nv_sig)
+        # nv.do_update_haystack_file(nv_sig)
         
         ### Turn laser on 
         # tool_belt.laser_on('cobolt_515') # turn the laser

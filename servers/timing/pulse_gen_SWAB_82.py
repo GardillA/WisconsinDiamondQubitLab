@@ -31,11 +31,11 @@ from pulsestreamer import OutputState
 import importlib
 import os
 import sys
-import utils.tool_belt as tool_belt
 import logging
 import socket
 from pathlib import Path
 from servers.timing.interfaces.pulse_gen import PulseGen
+import utils.tool_belt as tool_belt
 
 
 class PulseGenSwab82(PulseGen, LabradServer):
