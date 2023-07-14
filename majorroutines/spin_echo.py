@@ -503,15 +503,15 @@ def create_fit_figure(
             r"$T_{2}=$%.3f $\mathrm{\mu s}$" % (T_2 / 1000),
         ))
 
-    text_B = "\n".join(
-        (
-            "Estimated D.C magnetic field",
-            r"from $T_r$ is $B=$%.3f G" % (mag_B_from_revival_time(revival_time)),
-        ))
+    # text_B = "\n".join(
+    #     (
+    #         "Estimated D.C magnetic field",
+    #         r"from $T_r$ is $B=$%.3f G" % (mag_B_from_revival_time(revival_time)),
+    #     ))
     
     kpl.anchored_text(ax, eq_text, kpl.Loc.UPPER_RIGHT, size=kpl.Size.SMALL)
     kpl.anchored_text(ax, text_popt, kpl.Loc.LOWER_LEFT, size=kpl.Size.SMALL)
-    kpl.anchored_text(ax, text_B, kpl.Loc.LOWER_RIGHT, size=kpl.Size.SMALL)
+    # kpl.anchored_text(ax, text_B, kpl.Loc.LOWER_RIGHT, size=kpl.Size.SMALL)
 
     return fit_fig
 

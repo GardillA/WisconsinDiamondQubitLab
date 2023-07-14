@@ -23,7 +23,7 @@ if __name__ == "__main__":
     
     # %%%%%%%%%%%%%%% NV Parameters %%%%%%%%%%%%%%%
     
-    nv_coords = [4.959, 5.267, 4.88]# V  #
+    nv_coords = [4.513, 4.715, 4.88]# V  #
     # expected_count_rate = None
     expected_count_rate = None#17.3
     # kps
