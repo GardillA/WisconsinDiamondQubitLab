@@ -822,8 +822,8 @@ def get_raw_data_path(
 
 
 def get_branch_name():
-    """Return the name of the active branch of kolkowitz-nv-experiment-v1.0"""
-    home_to_repo = PurePath("Documents/GitHub/kolkowitz-nv-experiment-v1.0")
+    """Return the name of the active branch of WisconsinDiamondQubitLab"""
+    home_to_repo = PurePath("Documents/GitHub/WisconsinDiamondQubitLab")
     repo_path = PurePath(Path.home()) / home_to_repo
     repo = Repo(repo_path)
     return repo.active_branch.name

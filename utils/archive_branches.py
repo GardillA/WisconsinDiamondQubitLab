@@ -138,7 +138,7 @@ def main(repo_path, branches_to_archive, skip_merged_check=False):
 if __name__ == "__main__":
 
     # Path to your local checkout of the repo
-    repo_path = Path.home() / "Documents/GitHub/kolkowitz-nv-experiment-v1.0"
+    repo_path = Path.home() / "Documents/GitHub/WisconsinDiamondQubitLab"
 
     # List of branches to archive
     branches_to_archive = [
