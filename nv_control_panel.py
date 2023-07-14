@@ -446,7 +446,7 @@ if __name__ == '__main__':
         
         # do_ramsey(nv_sig, set_detuning=0,num_runs=25, precession_time_range = [0, 1.75 * 10 ** 3],num_steps = 75)  
        
-        # do_spin_echo(nv_sig,echo_time_range = [0, 110 * 10 ** 3], num_steps=71, num_runs=50, calc_theta_B = True) 
+        do_spin_echo(nv_sig,echo_time_range = [0, 8 * 10 ** 3], num_steps=81, num_runs=50, calc_theta_B = False) 
         pass
     finally:
 

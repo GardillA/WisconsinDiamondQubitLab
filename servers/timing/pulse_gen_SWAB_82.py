@@ -67,7 +67,7 @@ class PulseGenSwab82(PulseGen, LabradServer):
 
         sequence_library_path = (
             Path.home()
-            / f"Documents/GitHub/kolkowitz-nv-experiment-v1.0/servers/timing/sequencelibrary/{self.name}"
+            / f"Documents/GitHub/WisconsinDiamondQubitLab/servers/timing/sequencelibrary/{self.name}"
         )
         sys.path.append(str(sequence_library_path))
         self.get_config_dict()

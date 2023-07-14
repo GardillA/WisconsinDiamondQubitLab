@@ -84,7 +84,7 @@ if __name__ == "__main__":
         
         ### Autotracking functions
         # nv.do_auto_check_location(nv_sig)
-        # nv.do_update_haystack_file(nv_sig)
+        nv.do_update_haystack_file(nv_sig)
         
         ### Turn laser on 
         # tool_belt.laser_on('cobolt_515') # turn the laser
@@ -92,7 +92,7 @@ if __name__ == "__main__":
         ####### EXPERIMENT 0: Finding an nv #######
         ### Take confocal image
         ### xy scans can be ['small', 'medium', 'big-ish', 'big', 'huge']
-        nv.do_image_sample(nv_sig,  scan_size='small')  
+        # nv.do_image_sample(nv_sig,  scan_size='small')  
         # nv.do_image_sample(nv_sig, scan_size='medium') 
         # nv.do_image_sample(nv_sig, scan_size='big')
         # nv.do_image_sample(nv_sig,  scan_size='big-ish')
