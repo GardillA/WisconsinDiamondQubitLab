@@ -154,7 +154,7 @@ if __name__ == "__main__":
             # Perform optimize, if counts are below a certain value, run autotracker to try to find the NV.
             # _, opti_count_rate = nv.do_optimize(nv_sig,save_data = False, close_plot=True)
             # if opti_count_rate < 8:
-            #     nv.do_auto_check_location(close_plot=True)
+            nv.do_auto_check_location(close_plot=True)
             
             # for the experiments that use MWs, make a copy of the nv_sig and put in the arguments
             nv_sig_run = copy.deepcopy(nv_sig)

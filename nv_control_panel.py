@@ -237,7 +237,7 @@ def do_optimize_magnet_angle(nv_sig):
     freq_center = 2.87
     freq_range= 0.2
     num_freq_steps = 75
-    num_freq_runs = 5
+    num_freq_runs = 10
     
     # Pulsed
     # uwave_power = 14
@@ -369,7 +369,7 @@ if __name__ == '__main__':
     
         
     nv_sig = {
-        "coords":[5.391, 5.078, 4.09],  
+        "coords":[5.042, 5.042, 4.00],  
         "name": "{}-nv1".format(sample_name,),
         "expected_count_rate":18,
         "disable_opt":False,
@@ -386,9 +386,9 @@ if __name__ == '__main__':
         "imaging_readout_dur": 1e7,
         "collection_filter": "630_lp",
         
-        "magnet_angle": 120, 
-        "resonance_LOW":2.87 ,"rabi_LOW": 100, "uwave_power_LOW": 14,  # 15.5 max. units is dBm
-        "resonance_HIGH": 2.9123, "rabi_HIGH": 100, "uwave_power_HIGH": 14, 
+        "magnet_angle": 97, 
+        "resonance_LOW":2.8136 ,"rabi_LOW": 100, "uwave_power_LOW": 14,  # 15.5 max. units is dBm
+        "resonance_HIGH": 2.926, "rabi_HIGH": 100, "uwave_power_HIGH": 14, 
         'norm_style':NormStyle.SINGLE_VALUED}  # 14.5 max. units is dBm
     
     nv_sig = nv_sig
@@ -406,7 +406,7 @@ if __name__ == '__main__':
         #     tool_belt.laser_on(cxn, 'cobolt_515') # turn the laser on
             # tool_belt.laser_off(cxn, 'cobolt_515') # turn the laser on
         
-        # do_auto_check_location(nv_sig,close_plot=False)
+        do_auto_check_location(nv_sig,close_plot=False)
         # do_update_haystack_file(nv_sig)
 
         
@@ -431,18 +431,18 @@ if __name__ == '__main__':
         # nv_sig['disable_opt']=True
         # do_stationary_count(nv_sig, )
         
-        do_optimize_magnet_angle(nv_sig)
+        # do_optimize_magnet_angle(nv_sig)
         # do_pulsed_resonance(nv_sig, freq_center=2.87, freq_range=0.2,num_runs=15)
         # mangles = [0,30,60,90,120,150]
         # for m in mangles:
         #     nv_sig['magnet_angle'] = m
         #     do_resonance(nv_sig, 2.87, 0.25, num_runs = 15)
         # nv_sig['disable_opt']=True
-        # do_resonance(nv_sig, 2.87, 0.2,num_steps=51,num_runs=5, uwave_power=-5.0)
+        # do_resonance(nv_sig, 2.87, 0.2,num_steps=51,num_runs=15, uwave_power=-5.0)
         # do_resonance_state(nv_sig , States.LOW)
                 
-        # do_rabi(nv_sig,  States.LOW, uwave_time_range=[0, 200],num_steps = 51, num_runs=3)
-        # do_rabi(nv_sig,  States.HIGH, uwave_time_range=[0, 200],num_steps = 51,num_runs=5)
+        do_rabi(nv_sig,  States.LOW, uwave_time_range=[0, 200],num_steps = 51, num_runs=15)
+        do_rabi(nv_sig,  States.HIGH, uwave_time_range=[0, 200],num_steps = 51,num_runs=15)
         
         # do_ramsey(nv_sig, set_detuning=0,num_runs=25, precession_time_range = [0, 1.75 * 10 ** 3],num_steps = 75)  
        
