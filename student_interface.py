@@ -23,9 +23,9 @@ if __name__ == "__main__":
     
     # %%%%%%%%%%%%%%% NV Parameters %%%%%%%%%%%%%%%
     
-    nv_coords = [5.35, 5.131, 4.87]# V  #
+    nv_coords = [5.042, 5.042, 4.00]# V  #
     # expected_count_rate = None
-    expected_count_rate = None#17.3
+    expected_count_rate = 18
     # kps
     # magnet_angle = 85 # deg
     magnet_angle = 153+(1/3) # deg

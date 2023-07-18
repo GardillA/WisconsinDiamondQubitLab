@@ -387,7 +387,7 @@ if __name__ == '__main__':
         "collection_filter": "630_lp",
         
         "magnet_angle": 97, 
-        "resonance_LOW":2.8136 ,"rabi_LOW": 100, "uwave_power_LOW": 14,  # 15.5 max. units is dBm
+        "resonance_LOW":2.8136 ,"rabi_LOW": 90, "uwave_power_LOW": 14,  # 15.5 max. units is dBm
         "resonance_HIGH": 2.926, "rabi_HIGH": 100, "uwave_power_HIGH": 14, 
         'norm_style':NormStyle.SINGLE_VALUED}  # 14.5 max. units is dBm
     
@@ -441,12 +441,12 @@ if __name__ == '__main__':
         # do_resonance(nv_sig, 2.87, 0.2,num_steps=51,num_runs=15, uwave_power=-5.0)
         # do_resonance_state(nv_sig , States.LOW)
                 
-        do_rabi(nv_sig,  States.LOW, uwave_time_range=[0, 200],num_steps = 51, num_runs=15)
-        do_rabi(nv_sig,  States.HIGH, uwave_time_range=[0, 200],num_steps = 51,num_runs=15)
+        # do_rabi(nv_sig,  States.LOW, uwave_time_range=[0, 200],num_steps = 51, num_runs=15)
+        # do_rabi(nv_sig,  States.HIGH, uwave_time_range=[0, 200],num_steps = 51,num_runs=15)
         
         # do_ramsey(nv_sig, set_detuning=0,num_runs=25, precession_time_range = [0, 1.75 * 10 ** 3],num_steps = 75)  
        
-        # do_spin_echo(nv_sig,echo_time_range = [0, 8 * 10 ** 3], num_steps=81, num_runs=50, calc_theta_B = False) 
+        #do_spin_echo(nv_sig,echo_time_range = [0, 200 * 10 ** 3], num_steps=81, num_runs=50, calc_theta_B = False) 
         pass
     finally:
 
