@@ -33,6 +33,7 @@ def set_xyz(cxn, coords):
     z_dtype = eval(z_dtype)
     pos_xy_server = get_server_pos_xy(cxn)
     pos_z_server = get_server_pos_z(cxn)
+    # debugging : pos_xy_server is NoneType
     pos_xy_server.write_xy(xy_dtype(coords[0]), xy_dtype(coords[1]))
     pos_z_server.write_z(z_dtype(coords[2]))
     # Force some delay before proceeding to account for the effective write time

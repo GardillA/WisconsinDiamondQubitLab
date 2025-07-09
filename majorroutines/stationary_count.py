@@ -79,7 +79,8 @@ def main_with_cxn(
     seq_args_string = tool_belt.encode_seq_args(seq_args)
     seq_name = "simple_readout.py"
     ret_vals = pulsegen_server.stream_load(seq_name, seq_args_string)
-    period = ret_vals[0]
+    ccc=1
+    period = ret_vals[0]*ccc
 
     total_num_samples = int(run_time / period)
     run_time_s = run_time * 1e-9

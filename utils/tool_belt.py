@@ -1240,11 +1240,14 @@ def check_exp_lock(): #potentially pst the runtime and the timestamp?
     
     This will check what that entry is, and if it is locked, it will throw an error
     '''
+    # Dan: temporarily disabling this, because the lock is not getting released properly
+    return True
+
     file_lock_path = common.get_web_worker_dir()
     file_lock_path_ext = file_lock_path / file_lock_name
     locked_state = ExpLock.LOCK
     unlocked_state = ExpLock.UNLOCK
-    
+
     try:
         with file_lock_path_ext.open() as f:
             dic_lock_read = json.load(f)

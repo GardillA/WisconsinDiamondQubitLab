@@ -120,6 +120,14 @@ def do_update_haystack_file(nv_sig):
     print('\n***HAYSTACK FILE UPDATED***\nCenter coords of haystack image (in um): [{:.2f}, {:.2f}, {:.2f}]\nUpdate um coords at {}'.format(coords_um[0],
                                                                                          coords_um[1], coords_um[2], admin_webpage))
     
+
+# def custom_do_image_sample(nv_sig, scan_range, num_steps, um_plot = False, close_plot=False, 
+#                     widqol = False, standalone_exp = True):
+#     fname = image_sample.main(nv_sig, scan_range, scan_range, num_steps,um_plot, 
+#                               close_plot=close_plot,
+#                               widqol = widqol,
+#                               standalone_exp = standalone_exp)
+#     return fname
     
 
 def do_image_sample(nv_sig, scan_size='medium', um_plot = False, close_plot=False, 
@@ -151,13 +159,13 @@ def do_image_sample(nv_sig, scan_size='medium', um_plot = False, close_plot=Fals
         scan_range = 0.8
         num_steps = 60
     elif scan_size == 'test':
-        scan_range = .3
-        num_steps = 10
+        scan_range = 9.9
+        num_steps = 150
     elif scan_size == 'needle':
         scan_range = 0.4 
         num_steps = 40
     elif scan_size == 'haystack':
-        scan_range = 1.2 # large scan
+        scan_range = 1.2 # large scan 
         num_steps = 120
         
     # For now we only support square scans so pass scan_range twice
@@ -188,6 +196,7 @@ def do_optimize(nv_sig,set_to_opti_coords=False,save_data=True,plot_data=True,cl
 def do_stationary_count(nv_sig):
 
     run_time = 3 * 60 * 10 ** 9  # ns
+    # run_time = 30* 60 * 10 ** 9  # ns
 
     stationary_count.main(nv_sig, run_time)
 

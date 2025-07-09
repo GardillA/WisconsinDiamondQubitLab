@@ -525,7 +525,7 @@ def main_with_cxn(
 
     # Adjust the sig we use for drift
     drift = positioning.get_drift(cxn)
-    passed_coords = nv_sig["coords"]
+    passed_coords = nv_sig["coords"]                                                                                                                                                                                                                                                                                                                                                                                                                             
     adjusted_coords = (numpy.array(passed_coords) + numpy.array(drift)).tolist()
     # If optimize is disabled, just set the filters and magnet in place
     if nv_sig["disable_opt"]:
