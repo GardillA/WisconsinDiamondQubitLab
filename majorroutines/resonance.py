@@ -266,8 +266,11 @@ def main_with_cxn(cxn, nv_sig,  freq_center, freq_range,
         fit_fig, _, fit_func, popt, _ = pulsed_resonance.create_fit_figure(
             freq_center, freq_range, num_steps, norm_avg_sig, norm_avg_sig_ste, start_kpl=True
         )
-    except Exception:
+    except Exception as e:
         popt = []
+        ##Prior to adding this line there was no indication that the fit failed.
+        print("Fit failed in resonance.py with Exception:", e)
+        
         fit_success = False
     
     low_freq = None
